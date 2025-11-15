@@ -21,10 +21,7 @@ jobs:
         version: "latest"
 
     - name: Install dependencies
-      run: |
-        uv venv
-        uv pip install -r requirements.txt
-        uv pip install mypy types-requests
+      run: uv sync --all-extras
 
     - name: Run MyPy
-      run: uv run mypy *.py --ignore-missing-imports
+      run: uv run mypy .

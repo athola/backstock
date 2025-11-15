@@ -21,13 +21,10 @@ jobs:
         version: "latest"
 
     - name: Install dependencies
-      run: |
-        uv venv
-        uv pip install -r requirements.txt
-        uv pip install ruff
+      run: uv sync --all-extras
 
     - name: Run Ruff linting
-      run: uv run ruff check *.py
+      run: uv run ruff check .
 
     - name: Run Ruff formatting check
-      run: uv run ruff format --check *.py
+      run: uv run ruff format --check .
