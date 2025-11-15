@@ -109,7 +109,9 @@ def test_add_item_new(app: Flask, sample_grocery_data: dict[str, str | int | dat
 
 
 @pytest.mark.unit
-def test_add_item_duplicate(app: Flask, sample_grocery: None, sample_grocery_data: dict[str, str | int | date | None]) -> None:
+def test_add_item_duplicate(
+    app: Flask, sample_grocery: None, sample_grocery_data: dict[str, str | int | date | None]
+) -> None:
     """Test adding a duplicate item."""
     from inventoryApp import add_item
     from models import Grocery
