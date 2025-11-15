@@ -5,14 +5,14 @@ import csv
 import json
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import select, func
+from sqlalchemy import func
 
 inventoryApp = Flask(__name__)
 inventoryApp.config.from_object(os.environ.get('APP_SETTINGS', 'config.DevelopmentConfig'))
 inventoryApp.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(inventoryApp)
 
-from models import Grocery
+from models import Grocery  # noqa: E402
 
 @inventoryApp.route('/', methods=['GET', 'POST'])
 def index():
@@ -89,7 +89,6 @@ def index():
 			except Exception as ex:
 				error_type = 'Unable to add item. Please double check your item parameters. '
 				errors = report_exception(ex, error_type, errors)
-	item_length = len(items)
 	return render_template('index.html', errors = errors, items=items, column=col, loading_search=load_search, loading_add_item=load_add_item, loading_add_csv=load_add_csv, item_searched=item_searched, item_added=item_added, )
 	
 def report_exception(ex, error_type, errors):

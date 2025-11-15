@@ -1,19 +1,19 @@
-from inventoryApp import db
+from inventoryApp import db  # type: ignore
 from typing import Optional
 from datetime import date
 
-class Grocery(db.Model):
+class Grocery(db.Model):  # type: ignore
 	__tablename__ = 'grocery_items'
 
-	id = db.Column(db.Integer, primary_key=True)
-	description = db.Column(db.String(60), nullable=False)
-	last_sold = db.Column(db.Date)
-	shelf_life = db.Column(db.String(5), nullable=False)
-	department = db.Column(db.String(40))
-	price = db.Column(db.String(20), nullable=False)
-	unit = db.Column(db.String(10), nullable=False)
-	x_for = db.Column(db.Integer, nullable=False)
-	cost = db.Column(db.String(20), nullable=False)
+	id = db.Column(db.Integer, primary_key=True)  # type: ignore
+	description = db.Column(db.String(60), nullable=False)  # type: ignore
+	last_sold = db.Column(db.Date)  # type: ignore
+	shelf_life = db.Column(db.String(5), nullable=False)  # type: ignore
+	department = db.Column(db.String(40))  # type: ignore
+	price = db.Column(db.String(20), nullable=False)  # type: ignore
+	unit = db.Column(db.String(10), nullable=False)  # type: ignore
+	x_for = db.Column(db.Integer, nullable=False)  # type: ignore
+	cost = db.Column(db.String(20), nullable=False)  # type: ignore
 
 	def __init__(self, id: int, description: str, last_sold: Optional[date], shelf_life: str,
 				 department: Optional[str], price: str, unit: str, x_for: int, cost: str):
