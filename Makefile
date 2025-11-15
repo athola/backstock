@@ -25,7 +25,7 @@ test:
 
 typecheck:
 	uv run mypy .
-	uv run ty check . --exclude migrations --exclude manage.py
+	uv run ty check . --exclude migrations
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
