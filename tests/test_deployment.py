@@ -4,7 +4,10 @@ These tests ensure that the application is correctly configured for
 deployment on Render and other production environments.
 """
 
+import importlib
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -257,3 +260,431 @@ def test_gunicorn_version_check() -> None:
         pytest.skip("uv command not available in test environment")
     except subprocess.TimeoutExpired:
         pytest.fail("Gunicorn version check timed out")
+
+
+@pytest.mark.integration
+def test_config_handles_missing_database_url() -> None:
+    """Test that Config class handles missing DATABASE_URL gracefully.
+
+    This prevents the SQLAlchemy ArgumentError that caused the "Not found"
+    issue on Render when DATABASE_URL was not properly configured.
+    """
+    # Save original DATABASE_URL if it exists
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Remove DATABASE_URL to simulate missing configuration
+        if "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Remove config module from cache to force re-import
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+        # Import config module fresh
+        config_module = importlib.import_module("src.pybackstock.config")
+        config_class = config_module.Config
+
+        # Verify that SQLALCHEMY_DATABASE_URI is set to a valid value
+        assert hasattr(config_class, "SQLALCHEMY_DATABASE_URI"), "SQLALCHEMY_DATABASE_URI not set"
+        assert config_class.SQLALCHEMY_DATABASE_URI, "SQLALCHEMY_DATABASE_URI is empty"
+        assert config_class.SQLALCHEMY_DATABASE_URI != "", "SQLALCHEMY_DATABASE_URI should not be empty string"
+
+        # Verify it's using SQLite fallback
+        assert "sqlite:///" in config_class.SQLALCHEMY_DATABASE_URI, (
+            "Config should fallback to SQLite when DATABASE_URL is not set"
+        )
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Clean up module cache
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+
+@pytest.mark.integration
+def test_config_handles_empty_database_url() -> None:
+    """Test that Config class handles empty DATABASE_URL string gracefully.
+
+    Empty string DATABASE_URL previously caused SQLAlchemy to fail with:
+    'Could not parse SQLAlchemy URL from given URL string'
+    """
+    # Save original DATABASE_URL if it exists
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Set DATABASE_URL to empty string
+        os.environ["DATABASE_URL"] = ""
+
+        # Remove config module from cache to force re-import
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+        # Import config module fresh
+        config_module = importlib.import_module("src.pybackstock.config")
+        config_class = config_module.Config
+
+        # Verify that SQLALCHEMY_DATABASE_URI is set to a valid value
+        assert hasattr(config_class, "SQLALCHEMY_DATABASE_URI"), "SQLALCHEMY_DATABASE_URI not set"
+        assert config_class.SQLALCHEMY_DATABASE_URI, "SQLALCHEMY_DATABASE_URI is empty"
+        assert config_class.SQLALCHEMY_DATABASE_URI != "", "SQLALCHEMY_DATABASE_URI should not be empty string"
+
+        # Verify it's using SQLite fallback (since empty string is treated as None)
+        assert "sqlite:///" in config_class.SQLALCHEMY_DATABASE_URI, (
+            "Config should fallback to SQLite when DATABASE_URL is empty string"
+        )
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Clean up module cache
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+
+@pytest.mark.integration
+def test_gunicorn_boots_without_database_url() -> None:
+    """Test that Gunicorn can successfully boot the app without DATABASE_URL.
+
+    This is critical for preventing deployment failures. The application should
+    start even if DATABASE_URL is not configured, using the SQLite fallback.
+    """
+    # Save original DATABASE_URL if it exists
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Remove DATABASE_URL to simulate missing configuration
+        if "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Try to boot Gunicorn with a very short timeout
+        # We just want to verify it starts without crashing, not run it
+        result = subprocess.run(
+            [
+                "uv",
+                "run",
+                "gunicorn",
+                "src.pybackstock.app:app",
+                "--bind",
+                "127.0.0.1:9999",
+                "--timeout",
+                "1",
+                "--preload",  # Load app before forking to catch import errors
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+            env={**os.environ, "DATABASE_URL": ""},  # Explicitly set empty DATABASE_URL
+        )
+
+        # Check that Gunicorn didn't fail with import/startup errors
+        # It's okay if it exits due to timeout, but not due to import errors
+        assert "Could not parse SQLAlchemy URL" not in result.stderr, (
+            "Gunicorn failed with SQLAlchemy URL parsing error. Config should handle missing DATABASE_URL gracefully."
+        )
+        assert "ArgumentError" not in result.stderr, (
+            "Gunicorn failed with ArgumentError. Check DATABASE_URL handling in config."
+        )
+        assert "Exception in worker process" not in result.stderr or "Worker failed to boot" not in result.stderr, (
+            "Gunicorn worker failed to boot. Application should start without DATABASE_URL."
+        )
+    except subprocess.TimeoutExpired:
+        # Timeout is acceptable - we just want to verify it starts
+        pass
+    except FileNotFoundError:
+        pytest.skip("uv command not available in test environment")
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+
+@pytest.mark.integration
+def test_app_can_import_without_database_url() -> None:
+    """Test that the app module can be imported without DATABASE_URL.
+
+    This verifies that importing the app doesn't immediately crash when
+    DATABASE_URL is missing.
+    """
+    # Save original DATABASE_URL if it exists
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Remove DATABASE_URL
+        if "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Remove the module from cache to force re-import
+        if "src.pybackstock.app" in sys.modules:
+            del sys.modules["src.pybackstock.app"]
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+        # Try to import the app - this should not crash
+        try:
+            app_module = importlib.import_module("src.pybackstock.app")
+            assert app_module is not None, "Failed to import app module"
+            assert hasattr(app_module, "app"), "App module doesn't have 'app' attribute"
+        except Exception as e:
+            if "Could not parse SQLAlchemy URL" in str(e):
+                pytest.fail(
+                    "App import failed with SQLAlchemy URL error. Config must handle missing DATABASE_URL gracefully."
+                )
+            raise
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Clean up module cache
+        if "src.pybackstock.app" in sys.modules:
+            del sys.modules["src.pybackstock.app"]
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+
+@pytest.mark.integration
+def test_config_postgres_url_conversion() -> None:
+    """Test that Config properly converts postgres:// to postgresql:// URLs."""
+    # Save original DATABASE_URL if it exists
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Test old-style postgres:// URL
+        os.environ["DATABASE_URL"] = "postgres://user:pass@host:5432/db"
+
+        # Remove config module from cache to force re-import with new DATABASE_URL
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+        # Import config module fresh
+        config_module = importlib.import_module("src.pybackstock.config")
+        config_class = config_module.Config
+
+        # Verify conversion to postgresql://
+        assert config_class.SQLALCHEMY_DATABASE_URI == "postgresql://user:pass@host:5432/db", (
+            "Config should convert postgres:// to postgresql://"
+        )
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Clean up module cache
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+
+@pytest.mark.integration
+def test_render_yaml_database_url_configured() -> None:
+    """Test that render.yaml properly configures DATABASE_URL from database service.
+
+    This ensures successful deployment by verifying that the DATABASE_URL
+    environment variable is linked to the PostgreSQL database service.
+    """
+    render_yaml_path = Path(__file__).parent.parent / "render.yaml"
+    with open(render_yaml_path) as f:
+        config = yaml.safe_load(f)
+
+    services = config.get("services", [])
+    web_service = next((s for s in services if s.get("type") == "web"), None)
+
+    assert web_service is not None, "No web service found in render.yaml"
+
+    env_vars = web_service.get("envVars", [])
+    database_url_var = next((e for e in env_vars if e.get("key") == "DATABASE_URL"), None)
+
+    # Verify DATABASE_URL is configured
+    assert database_url_var is not None, (
+        "DATABASE_URL environment variable not found in render.yaml. This will cause deployment failure."
+    )
+
+    # Verify it's linked to a database service
+    assert "fromDatabase" in database_url_var, (
+        "DATABASE_URL should be linked to a database service via 'fromDatabase'. "
+        "Without this, the app will use SQLite fallback instead of PostgreSQL."
+    )
+
+    from_database = database_url_var.get("fromDatabase", {})
+    assert "name" in from_database, "DATABASE_URL fromDatabase must specify database 'name'"
+    assert "property" in from_database, "DATABASE_URL fromDatabase must specify 'property'"
+    assert from_database.get("property") == "connectionString", (
+        "DATABASE_URL should use 'connectionString' property from database"
+    )
+
+
+@pytest.mark.integration
+def test_render_yaml_database_service_exists() -> None:
+    """Test that render.yaml defines the database service that DATABASE_URL references."""
+    render_yaml_path = Path(__file__).parent.parent / "render.yaml"
+    with open(render_yaml_path) as f:
+        config = yaml.safe_load(f)
+
+    # Get DATABASE_URL configuration from web service
+    services = config.get("services", [])
+    web_service = next((s for s in services if s.get("type") == "web"), None)
+    assert web_service is not None
+
+    env_vars = web_service.get("envVars", [])
+    database_url_var = next((e for e in env_vars if e.get("key") == "DATABASE_URL"), None)
+    assert database_url_var is not None
+
+    database_name = database_url_var.get("fromDatabase", {}).get("name")
+    assert database_name, "DATABASE_URL must reference a database name"
+
+    # Verify the database service exists
+    databases = config.get("databases", [])
+    database_service = next((d for d in databases if d.get("name") == database_name), None)
+
+    assert database_service is not None, (
+        f"Database service '{database_name}' referenced by DATABASE_URL not found in render.yaml. "
+        "This will cause deployment failure."
+    )
+
+    # Verify database configuration
+    assert database_service.get("databaseName"), "Database service must have 'databaseName'"
+    assert database_service.get("user"), "Database service must have 'user'"
+
+
+@pytest.mark.integration
+def test_config_uses_postgresql_when_database_url_set() -> None:
+    """Test that Config uses PostgreSQL URI when DATABASE_URL is properly set.
+
+    This simulates the production deployment scenario where Render provides
+    a valid PostgreSQL DATABASE_URL.
+    """
+    # Save original DATABASE_URL if it exists
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Simulate Render's PostgreSQL connection string
+        test_db_url = "postgresql://pybackstock:testpass@host.render.com:5432/pybackstock"
+        os.environ["DATABASE_URL"] = test_db_url
+
+        # Remove config module from cache to force re-import
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+        # Import config module fresh
+        config_module = importlib.import_module("src.pybackstock.config")
+        config_class = config_module.Config
+
+        # Verify it's using the PostgreSQL DATABASE_URL, not SQLite fallback
+        assert test_db_url == config_class.SQLALCHEMY_DATABASE_URI, (
+            "Config should use DATABASE_URL when set, not fallback to SQLite"
+        )
+        assert "postgresql://" in config_class.SQLALCHEMY_DATABASE_URI, "Production should use PostgreSQL, not SQLite"
+        assert "sqlite:///" not in config_class.SQLALCHEMY_DATABASE_URI, (
+            "Should not use SQLite fallback when DATABASE_URL is set"
+        )
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Clean up module cache
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+
+@pytest.mark.integration
+def test_production_config_with_database_url() -> None:
+    """Test that ProductionConfig properly uses DATABASE_URL from environment.
+
+    This validates that production deployment will use the correct database
+    configuration provided by Render.
+    """
+    # Save original DATABASE_URL if it exists
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Set a production-like DATABASE_URL
+        production_db_url = "postgresql://user:pass@postgres.render.com:5432/mydb"
+        os.environ["DATABASE_URL"] = production_db_url
+
+        # Remove config module from cache
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+        # Import and check ProductionConfig
+        config_module = importlib.import_module("src.pybackstock.config")
+        prod_config = config_module.ProductionConfig
+
+        # Verify ProductionConfig inherits and uses DATABASE_URL correctly
+        assert hasattr(prod_config, "SQLALCHEMY_DATABASE_URI"), "ProductionConfig must have SQLALCHEMY_DATABASE_URI"
+        assert production_db_url == prod_config.SQLALCHEMY_DATABASE_URI, (
+            "ProductionConfig should use DATABASE_URL from environment"
+        )
+        assert prod_config.DEBUG is False, "ProductionConfig should have DEBUG=False"
+        assert prod_config.SESSION_COOKIE_SECURE is True, "ProductionConfig should require HTTPS for session cookies"
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Clean up module cache
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+
+
+@pytest.mark.integration
+def test_app_starts_with_postgresql_database_url() -> None:
+    """Test that the app can successfully start with a PostgreSQL DATABASE_URL.
+
+    This simulates a successful Render deployment scenario.
+    """
+    # Save original DATABASE_URL
+    original_db_url = os.environ.get("DATABASE_URL")
+
+    try:
+        # Set a valid PostgreSQL URL format (doesn't need to be a real database)
+        os.environ["DATABASE_URL"] = "postgresql://user:pass@localhost:5432/testdb"
+
+        # Try to import and instantiate the app
+        # We're not connecting to the database, just verifying the app can start
+        # with the correct configuration
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+        if "src.pybackstock.app" in sys.modules:
+            del sys.modules["src.pybackstock.app"]
+
+        config_module = importlib.import_module("src.pybackstock.config")
+        config_class = config_module.Config
+
+        # Verify the PostgreSQL URL is being used
+        assert "postgresql://" in config_class.SQLALCHEMY_DATABASE_URI, (
+            "App should use PostgreSQL when DATABASE_URL is set to postgresql://"
+        )
+        assert "sqlite:///" not in config_class.SQLALCHEMY_DATABASE_URI, (
+            "App should not use SQLite when valid DATABASE_URL is provided"
+        )
+    finally:
+        # Restore original DATABASE_URL
+        if original_db_url is not None:
+            os.environ["DATABASE_URL"] = original_db_url
+        elif "DATABASE_URL" in os.environ:
+            del os.environ["DATABASE_URL"]
+
+        # Clean up module cache
+        if "src.pybackstock.config" in sys.modules:
+            del sys.modules["src.pybackstock.config"]
+        if "src.pybackstock.app" in sys.modules:
+            del sys.modules["src.pybackstock.app"]

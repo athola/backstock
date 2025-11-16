@@ -16,10 +16,14 @@ class Config:
     # Use environment variable for SECRET_KEY, fall back to generated secret for development
     SECRET_KEY = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
     # Handle both old and new PostgreSQL URI formats
-    database_url = os.environ.get("DATABASE_URL", "")
-    if database_url.startswith("postgres://"):
-        database_url = database_url.replace("postgres://", "postgresql://", 1)
-    SQLALCHEMY_DATABASE_URI = database_url
+    database_url = os.environ.get("DATABASE_URL")
+    if database_url:
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql://", 1)
+        SQLALCHEMY_DATABASE_URI = database_url
+    else:
+        # Fallback to SQLite for development/local testing
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{basedir}/app.db"
 
     # Security settings
     # Flask-WTF CSRF protection
