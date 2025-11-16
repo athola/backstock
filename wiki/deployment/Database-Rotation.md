@@ -122,7 +122,7 @@ ls -lh backups/
 
 ### Day 90: Delete Old Database
 
-**⚠️ ONLY after confirming new database works!**
+**WARNING: ONLY after confirming new database works!**
 
 1. Verify application is running correctly
 2. Check data is present
@@ -172,13 +172,13 @@ If you have no backups, you'll need to:
 
 ## Best Practices
 
-- ✅ **Set calendar reminders** for Day 85
-- ✅ **Download backups locally** as extra safety
-- ✅ **Test restore process** before rotation
-- ✅ **Keep multiple backup copies** (GitHub + local)
-- ✅ **Document database creation dates**
-- ❌ **Don't wait until Day 90** to start rotation
-- ❌ **Don't skip testing phase** (Day 88)
+- **Set calendar reminders** for Day 85
+- **Download backups locally** as extra safety
+- **Test restore process** before rotation
+- **Keep multiple backup copies** (GitHub + local)
+- **Document database creation dates**
+- **Don't wait until Day 90** to start rotation
+- **Don't skip testing phase** (Day 88)
 
 ## Quick Reference
 
