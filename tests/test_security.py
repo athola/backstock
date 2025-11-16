@@ -45,6 +45,7 @@ class TestCSRFProtection:
 
         # Extract CSRF token from the response
         import re
+
         csrf_match = re.search(rb'name="csrf_token" value="([^"]+)"', initial_response.data)
         assert csrf_match is not None, "CSRF token not found in initial response"
         csrf_token = csrf_match.group(1).decode()
