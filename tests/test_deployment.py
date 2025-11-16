@@ -68,6 +68,9 @@ def test_gunicorn_app_path() -> None:
 
     services = config.get("services", [])
     web_service = next((s for s in services if s.get("type") == "web"), None)
+
+    assert web_service is not None, "No web service found in render.yaml"
+
     start_command = web_service.get("startCommand", "")
 
     # Verify the correct app module path
@@ -103,6 +106,8 @@ def test_production_config_in_render() -> None:
     services = config.get("services", [])
     web_service = next((s for s in services if s.get("type") == "web"), None)
 
+    assert web_service is not None, "No web service found in render.yaml"
+
     env_vars = web_service.get("envVars", [])
     app_settings = next((e for e in env_vars if e.get("key") == "APP_SETTINGS"), None)
 
@@ -121,6 +126,8 @@ def test_database_connection_configured() -> None:
 
     services = config.get("services", [])
     web_service = next((s for s in services if s.get("type") == "web"), None)
+
+    assert web_service is not None, "No web service found in render.yaml"
 
     env_vars = web_service.get("envVars", [])
     database_url = next((e for e in env_vars if e.get("key") == "DATABASE_URL"), None)
@@ -164,6 +171,9 @@ def test_gunicorn_syntax() -> None:
 
     services = config.get("services", [])
     web_service = next((s for s in services if s.get("type") == "web"), None)
+
+    assert web_service is not None, "No web service found in render.yaml"
+
     start_command = web_service.get("startCommand", "")
 
     # Test that gunicorn command can be validated
@@ -210,6 +220,8 @@ def test_render_runtime_python() -> None:
 
     services = config.get("services", [])
     web_service = next((s for s in services if s.get("type") == "web"), None)
+
+    assert web_service is not None, "No web service found in render.yaml"
 
     assert web_service.get("runtime") == "python", "Runtime should be set to 'python'"
 
