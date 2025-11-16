@@ -24,7 +24,7 @@ Backstock is configured for deployment on **Render.com** as a free Heroku altern
 | Resource | Limit | Notes |
 |----------|-------|-------|
 | Web Service | Free | Auto-sleep after 15 min inactivity |
-| PostgreSQL | 1GB | ⚠️ **Expires after 90 days** |
+| PostgreSQL | 1GB | **Expires after 90 days** |
 | SSL Certificate | Included | Automatic provisioning |
 | Build Minutes | Unlimited | Shared resources |
 

@@ -41,14 +41,14 @@ pg_dump "$DATABASE_URL" > "$BACKUP_FILE"
 if [ $? -eq 0 ]; then
     # Get file size
     FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
-    echo -e "${GREEN}✓ Backup completed successfully!${NC}"
+    echo -e "${GREEN}Backup completed successfully!${NC}"
     echo "  File: $BACKUP_FILE"
     echo "  Size: $FILE_SIZE"
     echo ""
     echo "To restore this backup, run:"
     echo "  ./scripts/restore_database.sh $BACKUP_FILE"
 else
-    echo -e "${RED}✗ Backup failed${NC}"
+    echo -e "${RED}Backup failed${NC}"
     exit 1
 fi
 
@@ -57,14 +57,14 @@ if command -v gzip &> /dev/null; then
     echo -e "${YELLOW}Compressing backup...${NC}"
     gzip "$BACKUP_FILE"
     COMPRESSED_SIZE=$(du -h "${BACKUP_FILE}.gz" | cut -f1)
-    echo -e "${GREEN}✓ Compressed to ${BACKUP_FILE}.gz (${COMPRESSED_SIZE})${NC}"
+    echo -e "${GREEN}Compressed to ${BACKUP_FILE}.gz (${COMPRESSED_SIZE})${NC}"
 fi
 
 # Clean up old backups (keep last 5)
 echo -e "${YELLOW}Cleaning up old backups...${NC}"
 cd "$BACKUP_DIR"
 ls -t backstock_backup_*.sql* 2>/dev/null | tail -n +6 | xargs -r rm
-echo -e "${GREEN}✓ Cleanup complete${NC}"
+echo -e "${GREEN}Cleanup complete${NC}"
 
 echo ""
 echo -e "${GREEN}Backup process complete!${NC}"

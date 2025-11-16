@@ -49,7 +49,7 @@ echo "Target database: $DATABASE_URL"
 echo ""
 
 # Warning prompt
-echo -e "${YELLOW}⚠ WARNING: This will OVERWRITE the target database!${NC}"
+echo -e "${YELLOW}WARNING: This will OVERWRITE the target database!${NC}"
 read -p "Are you sure you want to continue? (yes/no): " -r
 echo
 if [[ ! $REPLY =~ ^[Yy][Ee][Ss]$ ]]; then
@@ -74,9 +74,9 @@ echo -e "${YELLOW}Starting database restore...${NC}"
 psql "$DATABASE_URL" < "$RESTORE_FILE"
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Database restore completed successfully!${NC}"
+    echo -e "${GREEN}Database restore completed successfully!${NC}"
 else
-    echo -e "${RED}✗ Database restore failed${NC}"
+    echo -e "${RED}Database restore failed${NC}"
     [ -n "$TEMP_FILE" ] && rm -f "$TEMP_FILE"
     exit 1
 fi

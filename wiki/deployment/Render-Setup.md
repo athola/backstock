@@ -84,10 +84,10 @@ After deployment:
 
 ## Next Steps
 
-- ✅ Application is deployed
-- 📅 Set calendar reminder for database rotation
-- 📖 Read [Database Rotation](Database-Rotation.md) guide
-- 🔍 Check [Troubleshooting](Troubleshooting.md) if issues occur
+- Application is deployed
+- Set calendar reminder for database rotation
+- Read [Database Rotation](Database-Rotation.md) guide
+- Check [Troubleshooting](Troubleshooting.md) if issues occur
 
 ## Auto-Deploy Configuration
 

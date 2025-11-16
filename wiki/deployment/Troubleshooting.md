@@ -422,10 +422,10 @@ Common issues and solutions for Render deployment.
 
 ### Check These First
 
-1. ✅ Render Dashboard logs
-2. ✅ GitHub Actions workflow logs
-3. ✅ This troubleshooting guide
-4. ✅ [Render documentation](https://render.com/docs)
+1. Render Dashboard logs
+2. GitHub Actions workflow logs
+3. This troubleshooting guide
+4. [Render documentation](https://render.com/docs)
 
 ### Contact Support
 

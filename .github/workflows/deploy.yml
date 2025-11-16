@@ -37,7 +37,7 @@ jobs:
       - name: Deploy to Render
         if: success()
         run: |
-          echo "🚀 Deployment triggered for Render"
+          echo "Deployment triggered for Render"
           echo "Render will auto-deploy from main branch"
           echo "Monitor deployment at: https://dashboard.render.com"
         # Note: Render auto-deploys when connected to GitHub
@@ -46,10 +46,10 @@ jobs:
       - name: Post-deployment notification
         if: success()
         run: |
-          echo "✅ Deployment workflow completed"
+          echo "Deployment workflow completed"
           echo "Application will be available at your Render URL shortly"
           echo ""
-          echo "⚠️  Database Expiration Reminder:"
+          echo "Database Expiration Reminder:"
           echo "Free Render PostgreSQL databases expire after 90 days"
           echo "Next rotation needed around: $(date -d '+90 days' '+%Y-%m-%d')"
 
@@ -66,7 +66,7 @@ jobs:
         run: |
           # This is a placeholder for database age checking
           # You can enhance this with actual Render API calls
-          echo "💡 Database Health Check"
+          echo "Database Health Check"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "Render free databases expire after 90 days"
