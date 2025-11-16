@@ -122,7 +122,7 @@ ls -lh backups/
 
 ### Day 90: Delete Old Database
 
-**⚠️ ONLY after confirming new database works!**
+**WARNING: ONLY after confirming new database works!**
 
 1. Verify application is running correctly
 2. Check data is present
