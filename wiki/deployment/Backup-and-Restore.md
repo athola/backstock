@@ -47,11 +47,11 @@ export DATABASE_URL="postgresql://user:pass@host:port/dbname"
 ```
 Starting database backup...
 Backup file: backups/backstock_backup_20250116_143022.sql
-✓ Backup completed successfully!
+Backup completed successfully!
   File: backups/backstock_backup_20250116_143022.sql
   Size: 2.4M
-✓ Compressed to backstock_backup_20250116_143022.sql.gz (512K)
-✓ Cleanup complete
+Compressed to backstock_backup_20250116_143022.sql.gz (512K)
+Cleanup complete
 ```
 
 ### Using pg_dump Directly
@@ -89,12 +89,12 @@ Database Restore Process
 Backup file: backups/backstock_backup_20250116_143022.sql.gz
 Target database: postgresql://...
 
-⚠ WARNING: This will OVERWRITE the target database!
+WARNING: This will OVERWRITE the target database!
 Are you sure you want to continue? (yes/no): yes
 
 Decompressing backup file...
 Starting database restore...
-✓ Database restore completed successfully!
+Database restore completed successfully!
 
 Restore process complete!
 
@@ -162,9 +162,9 @@ backups/
 ### Recommended Practice
 
 **Multiple Locations:**
-1. ✅ GitHub Releases (automatic)
-2. ✅ Local machine (download weekly)
-3. ✅ Cloud storage (optional: Google Drive, Dropbox)
+1. GitHub Releases (automatic)
+2. Local machine (download weekly)
+3. Cloud storage (optional: Google Drive, Dropbox)
 
 ## Backup Schedule
 
@@ -312,10 +312,10 @@ python scripts/automated_backup.py
 
 Backup files may contain sensitive data:
 
-- ✅ Stored in `.gitignore` (`backups/`, `*.sql`, `*.sql.gz`)
-- ✅ GitHub Releases (private repos only)
-- ❌ Never commit to repository
-- ❌ Be careful with public sharing
+- Stored in `.gitignore` (`backups/`, `*.sql`, `*.sql.gz`)
+- GitHub Releases (private repos only)
+- Never commit to repository
+- Be careful with public sharing
 
 ## Quick Commands
 
