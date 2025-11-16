@@ -39,14 +39,10 @@ cp .env.example .env
 
 ### Running app:
 
-This app can be viewed via webserver hosted on heroku at the following addresses:
-Staging:
-https://inventory-app-stage.herokuapp.com/
+**Hosted Demo:**
+- Live Demo: https://backstock.onrender.com (Render - Free Tier)
 
-Production:
-https://inventory-app-pro.herokuapp.com/
-
-To run locally (with virtual environment activated):
+**To run locally** (with virtual environment activated):
 ```bash
 python manage.py runserver
 ```
@@ -163,35 +159,33 @@ Describe table structure:
 \d grocery_items
 ```
 
-## Deployment (Heroku)
+## Deployment
 
-Check staging configuration:
-```bash
-heroku config --app inventory-app-stage
-```
+### Render (Recommended - Free Tier)
 
-Add PostgreSQL database:
-```bash
-heroku addons:create heroku-postgresql:hobby-dev --app inventory-app-stage
-```
+This application is configured for easy deployment on Render with automatic deployment from GitHub.
 
-Deploy to staging:
-```bash
-git push stage main
-```
+**Quick Start:**
+1. Create account at [render.com](https://render.com)
+2. Connect your GitHub repository
+3. Click **New +** → **Blueprint**
+4. Select this repository (Render will detect `render.yaml`)
+5. Click **Apply** - Render handles the rest!
 
-Run migrations on staging:
-```bash
-heroku run python manage.py db upgrade --app inventory-app-stage
-```
+**Features:**
+- Auto-deploy on push to `main` branch
+- Free PostgreSQL database (1GB)
+- Free SSL certificates
+- Automated weekly backups via GitHub Actions
 
-For production (same commands with production app name):
-```bash
-heroku config --app inventory-app-pro
-heroku addons:create heroku-postgresql:hobby-dev --app inventory-app-pro
-git push pro main
-heroku run python manage.py db upgrade --app inventory-app-pro
-```
+**Important:** Free Render databases expire after 90 days. See the **[Deployment Wiki](wiki/deployment)** for:
+- [Complete deployment guide](wiki/deployment/Render-Setup.md)
+- [Automated backup configuration](wiki/deployment/Backup-and-Restore.md)
+- [90-day database rotation process](wiki/deployment/Database-Rotation.md)
+- [Troubleshooting tips](wiki/deployment/Troubleshooting.md)
+- [Quick reference](wiki/deployment/Quick-Reference.md)
+
+**Your App URL:** `https://backstock.onrender.com` (or your assigned URL)
 
 ## Security Updates
 

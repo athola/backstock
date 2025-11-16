@@ -1,0 +1,79 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    name: Deploy Application to Render
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          version: "latest"
+
+      - name: Install dependencies
+        run: uv sync --all-extras
+
+      - name: Run tests
+        run: uv run pytest -v
+
+      - name: Run linting
+        run: uv run ruff check .
+
+      - name: Deploy to Render
+        if: success()
+        run: |
+          echo "🚀 Deployment triggered for Render"
+          echo "Render will auto-deploy from main branch"
+          echo "Monitor deployment at: https://dashboard.render.com"
+        # Note: Render auto-deploys when connected to GitHub
+        # No additional API call needed if auto-deploy is enabled in render.yaml
+
+      - name: Post-deployment notification
+        if: success()
+        run: |
+          echo "✅ Deployment workflow completed"
+          echo "Application will be available at your Render URL shortly"
+          echo ""
+          echo "⚠️  Database Expiration Reminder:"
+          echo "Free Render PostgreSQL databases expire after 90 days"
+          echo "Next rotation needed around: $(date -d '+90 days' '+%Y-%m-%d')"
+
+  database-health-check:
+    name: Check Database Age
+    runs-on: ubuntu-latest
+    needs: deploy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check database age
+        run: |
+          # This is a placeholder for database age checking
+          # You can enhance this with actual Render API calls
+          echo "💡 Database Health Check"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Render free databases expire after 90 days"
+          echo "To check your database age:"
+          echo "  1. Visit https://dashboard.render.com"
+          echo "  2. Navigate to your backstock-db database"
+          echo "  3. Check the 'Created' date in the database details"
+          echo ""
+          echo "Automated backup runs every Monday at 2 AM UTC"
+          echo "Manual backup: Run the 'Database Backup' workflow"
