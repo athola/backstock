@@ -97,7 +97,7 @@ class TestSecurityHeaders:
         csp = response.headers["Content-Security-Policy"]
         assert "default-src 'self'" in csp
 
-    def test_strict_transport_security_disabled_in_testing(self, app: Flask) -> None:
+    def test_strict_transport_security_disabled_in_testing(self, app: Any) -> None:
         """Test that HSTS is disabled in testing environment."""
         # HSTS should only be enabled in production with HTTPS
         # In testing, it should be disabled to avoid redirect loops
@@ -147,7 +147,7 @@ class TestErrorHandling:
 class TestFileUploadSecurity:
     """Test file upload security measures."""
 
-    def test_file_upload_size_limit(self, app: Flask) -> None:
+    def test_file_upload_size_limit(self, app: Any) -> None:
         """Test that file upload size limit is configured."""
         # Flask's MAX_CONTENT_LENGTH should be set
         assert app.config.get("MAX_CONTENT_LENGTH") is not None
@@ -208,8 +208,9 @@ class TestInputValidation:
 
     def test_no_misleading_sql_injection_check(self) -> None:
         """Test that code doesn't contain ineffective SQL injection checks."""
-        import inventoryApp
         from pathlib import Path
+
+        import inventoryApp
 
         # Read the source code
         source = Path(inventoryApp.__file__)
@@ -245,20 +246,16 @@ class TestInputValidation:
 class TestSessionSecurity:
     """Test session security configuration."""
 
-    def test_session_cookie_httponly(self, app: Flask) -> None:
+    def test_session_cookie_httponly(self, app: Any) -> None:
         """Test that session cookies are HTTPOnly."""
         assert app.config.get("SESSION_COOKIE_HTTPONLY", True) is True
 
-    def test_session_cookie_secure_in_production(self, app: Flask) -> None:
+    def test_session_cookie_secure_in_production(self, app: Any) -> None:
         """Test that session cookies are Secure in production."""
         if not app.config.get("DEBUG"):
             assert app.config.get("SESSION_COOKIE_SECURE", False) is True
 
-    def test_session_cookie_samesite(self, app: Flask) -> None:
+    def test_session_cookie_samesite(self, app: Any) -> None:
         """Test that session cookies have SameSite attribute."""
         samesite = app.config.get("SESSION_COOKIE_SAMESITE")
         assert samesite in ("Lax", "Strict", None)
-
-
-# Type hints import
-from typing import Any
