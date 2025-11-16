@@ -1,6 +1,8 @@
 """Unit tests for configuration module."""
 
+import importlib
 import os
+import sys
 
 import pytest
 
@@ -56,13 +58,10 @@ def test_database_url_conversion() -> None:
     os.environ["DATABASE_URL"] = "postgres://user:pass@localhost/db"
 
     # Need to reload the module to pick up new environment variable
-    import importlib
-    import sys
-
     if "src.backstock.config" in sys.modules:
         del sys.modules["src.backstock.config"]
 
-    from src.backstock.config import Config
+    from src.backstock.config import Config  # noqa: PLC0415 - Must import after env var manipulation
 
     assert Config.SQLALCHEMY_DATABASE_URI.startswith("postgresql://")
     assert "user:pass@localhost/db" in Config.SQLALCHEMY_DATABASE_URI
@@ -89,7 +88,7 @@ def test_secret_key_generation() -> None:
     else:
         old_key = None
 
-    from src.backstock.config import Config
+    from src.backstock.config import Config  # noqa: PLC0415 - Must import after env var manipulation
 
     assert Config.SECRET_KEY is not None
     assert len(Config.SECRET_KEY) > 0

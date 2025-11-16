@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
+import re
+from io import BytesIO
 from typing import Any
 
 import pytest
+
+from src.backstock import app as flask_app
 
 
 @pytest.fixture()
 def csrf_app() -> Any:
     """Create a Flask app with CSRF protection enabled for security testing."""
-    from src.backstock import app
-
     # Temporarily enable CSRF for these specific tests
-    app.config["WTF_CSRF_ENABLED"] = True
-    app.config["TESTING"] = True
-    return app
+    flask_app.config["WTF_CSRF_ENABLED"] = True
+    flask_app.config["TESTING"] = True
+    return flask_app
 
 
 @pytest.fixture()
@@ -44,8 +46,6 @@ class TestCSRFProtection:
         assert initial_response.status_code == 200
 
         # Extract CSRF token from the response
-        import re
-
         csrf_match = re.search(rb'name="csrf_token" value="([^"]+)"', initial_response.data)
         assert csrf_match is not None, "CSRF token not found in initial response"
         csrf_token = csrf_match.group(1).decode()
@@ -157,8 +157,6 @@ class TestFileUploadSecurity:
 
     def test_file_upload_validates_content_type(self, client: Any) -> None:
         """Test that file uploads validate content type."""
-        from io import BytesIO
-
         # Try uploading a file with wrong content type
         data = {"csv-submit": "", "csv-input": (BytesIO(b"malicious content"), "test.csv")}
         _response = client.post("/", data=data, content_type="multipart/form-data")
@@ -167,8 +165,6 @@ class TestFileUploadSecurity:
 
     def test_file_upload_rejects_oversized_files(self, client: Any) -> None:
         """Test that oversized files are rejected."""
-        from io import BytesIO
-
         # Create a large CSV (if MAX_CONTENT_LENGTH is set)
         large_content = b"x" * (17 * 1024 * 1024)  # 17MB
         data = {"csv-submit": "", "csv-input": (BytesIO(large_content), "large.csv")}
@@ -210,8 +206,8 @@ class TestInputValidation:
     def test_no_misleading_sql_injection_check(self) -> None:
         """Test that code doesn't contain ineffective SQL injection checks."""
         # Import the app module (not the app instance from __init__)
-        import importlib.util
-        from pathlib import Path
+        import importlib.util  # noqa: PLC0415 - Dynamic import needed for source code inspection
+        from pathlib import Path  # noqa: PLC0415 - Only used in this test
 
         app_module_path = Path("src/backstock/app.py").resolve()
         spec = importlib.util.spec_from_file_location("src.backstock.app", app_module_path)
