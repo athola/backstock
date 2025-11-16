@@ -72,7 +72,7 @@ jobs:
           echo "Render free databases expire after 90 days"
           echo "To check your database age:"
           echo "  1. Visit https://dashboard.render.com"
-          echo "  2. Navigate to your backstock-db database"
+          echo "  2. Navigate to your pybackstock-db database"
           echo "  3. Check the 'Created' date in the database details"
           echo ""
           echo "Automated backup runs every Monday at 2 AM UTC"
