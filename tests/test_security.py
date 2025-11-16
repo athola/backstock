@@ -211,7 +211,6 @@ class TestInputValidation:
         """Test that code doesn't contain ineffective SQL injection checks."""
         # Import the app module (not the app instance from __init__)
         import importlib.util
-        import sys
         from pathlib import Path
 
         app_module_path = Path("src/backstock/app.py").resolve()

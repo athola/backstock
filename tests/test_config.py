@@ -4,12 +4,18 @@ import os
 
 import pytest
 
+from src.backstock.config import (
+    Config,
+    DevelopmentConfig,
+    ProductionConfig,
+    StagingConfig,
+    TestingConfig,
+)
+
 
 @pytest.mark.unit
 def test_config_base() -> None:
     """Test base Config class."""
-    from src.backstock.config import Config
-
     assert Config.DEBUG is False
     assert Config.TESTING is False
     assert Config.CSRF_ENABLED is True
@@ -18,8 +24,6 @@ def test_config_base() -> None:
 @pytest.mark.unit
 def test_production_config() -> None:
     """Test ProductionConfig class."""
-    from src.backstock.config import ProductionConfig
-
     assert ProductionConfig.DEBUG is False
     assert ProductionConfig.TESTING is False
 
@@ -27,8 +31,6 @@ def test_production_config() -> None:
 @pytest.mark.unit
 def test_development_config() -> None:
     """Test DevelopmentConfig class."""
-    from src.backstock.config import DevelopmentConfig
-
     assert DevelopmentConfig.DEBUG is True
     assert DevelopmentConfig.DEVELOPMENT is True
 
@@ -36,16 +38,12 @@ def test_development_config() -> None:
 @pytest.mark.unit
 def test_testing_config() -> None:
     """Test TestingConfig class."""
-    from src.backstock.config import TestingConfig
-
     assert TestingConfig.TESTING is True
 
 
 @pytest.mark.unit
 def test_staging_config() -> None:
     """Test StagingConfig class."""
-    from src.backstock.config import StagingConfig
-
     assert StagingConfig.DEBUG is True
     assert StagingConfig.DEVELOPMENT is True
 
