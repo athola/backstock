@@ -1,7 +1,7 @@
 [project]
-name = "backstock"
+name = "pybackstock"
 version = "2.0.0"
-description = "Flask Backstock Inventory Management Application"
+description = "Flask PyBackstock Inventory Management Application"
 requires-python = ">=3.11"
 dependencies = [
     "flask>=3.0.0",
@@ -120,8 +120,8 @@ ignore = [
 # Migrations
 "migrations/*" = ["D", "ANN", "INP001"]
 # Source code
-"src/backstock/app.py" = ["FBT001", "ANN401"]
-"src/backstock/models.py" = ["DTZ007"]
+"src/pybackstock/app.py" = ["FBT001", "ANN401"]
+"src/pybackstock/models.py" = ["DTZ007"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -164,7 +164,7 @@ warn_redundant_casts = true
 warn_unused_ignores = true
 warn_no_return = true
 strict_equality = true
-plugins = ["sqlalchemy.ext.mypy.plugin"]
+# plugins = ["sqlalchemy.ext.mypy.plugin"]
 exclude = ["migrations/"]
 
 [[tool.mypy.overrides]]
@@ -173,5 +173,13 @@ module = [
     "flask_script",
     "flask_talisman",
     "flask_wtf.csrf",
+    "pytest",
+    "flask",
+    "flask.*",
+    "flask_sqlalchemy",
+    "sqlalchemy.*",
+    "werkzeug.*",
+    "playwright.*",
+    "requests",
 ]
 ignore_missing_imports = true

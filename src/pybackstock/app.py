@@ -1,4 +1,4 @@
-"""Flask backstock inventory management application."""
+"""Flask pybackstock inventory management application."""
 
 from __future__ import annotations
 
@@ -20,10 +20,10 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Query
     from werkzeug.datastructures import FileStorage
 
-# Get the root directory (project root, not src/backstock)
+# Get the root directory (project root, not src/pybackstock)
 _root_dir = Path(__file__).parent.parent.parent
 app = Flask(__name__, template_folder=str(_root_dir / "templates"))
-app.config.from_object(os.environ.get("APP_SETTINGS", "src.backstock.config.DevelopmentConfig"))
+app.config.from_object(os.environ.get("APP_SETTINGS", "src.pybackstock.config.DevelopmentConfig"))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Initialize security extensions
@@ -46,7 +46,7 @@ talisman = Talisman(
 db = SQLAlchemy(app)
 
 # Import models after db is created to avoid circular import
-from src.backstock.models import Grocery  # noqa: E402
+from src.pybackstock.models import Grocery  # noqa: E402
 
 
 class FormAction:
@@ -85,7 +85,7 @@ def render_index_template(
     Returns:
         Rendered HTML template.
     """
-    return render_template(
+    return render_template(  # type: ignore[no-any-return]
         "index.html",
         errors=errors,
         items=items,
@@ -248,7 +248,7 @@ def get_matching_items(search_column: str, search_item: str) -> Query[Any] | dic
         if not search_item.isdigit():
             return {}
         column = Grocery.id if search_column == "id" else Grocery.x_for
-        return Grocery.query.filter(column == int(search_item))  # type: ignore[no-any-return]
+        return Grocery.query.filter(column == int(search_item))
 
     # Build search term based on input
     if "*" in search_item or "_" in search_item:
@@ -264,7 +264,7 @@ def get_matching_items(search_column: str, search_item: str) -> Query[Any] | dic
     else:
         query = Grocery.query.filter(getattr(Grocery, search_column).ilike(search_term))
 
-    return query.order_by(Grocery.id)  # type: ignore[no-any-return]
+    return query.order_by(Grocery.id)
 
 
 def set_item() -> Grocery:

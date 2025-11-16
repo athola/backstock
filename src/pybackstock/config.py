@@ -1,4 +1,4 @@
-"""Backstock application configuration classes for different environments."""
+"""PyBackstock application configuration classes for different environments."""
 
 import os
 import secrets

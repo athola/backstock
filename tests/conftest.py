@@ -1,9 +1,9 @@
-"""Shared test fixtures for the backstock application tests."""
+"""Shared test fixtures for the pybackstock application tests."""
 
 import os
 
 # Set test environment BEFORE importing app modules
-os.environ["APP_SETTINGS"] = "src.backstock.config.TestingConfig"
+os.environ["APP_SETTINGS"] = "src.pybackstock.config.TestingConfig"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 from datetime import date
@@ -12,8 +12,8 @@ from typing import TypedDict
 import pytest
 from flask import Flask
 
-from src.backstock import Grocery, db
-from src.backstock import app as flask_app
+from src.pybackstock import Grocery, db
+from src.pybackstock import app as flask_app
 
 
 class GroceryData(TypedDict):
@@ -31,7 +31,7 @@ class GroceryData(TypedDict):
 
 
 @pytest.fixture()
-def app() -> Flask:  # type: ignore[misc]
+def app() -> Flask:
     """Create and configure a test Flask application.
 
     Returns:

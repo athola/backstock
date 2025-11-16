@@ -5,8 +5,8 @@ from typing import Any
 import pytest
 from flask import Flask
 
-from src.backstock.app import add_item, get_matching_items, report_exception
-from src.backstock.models import Grocery
+from src.pybackstock.app import add_item, get_matching_items, report_exception
+from src.pybackstock.models import Grocery
 from tests.conftest import GroceryData
 
 
