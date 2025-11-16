@@ -191,7 +191,7 @@ def verify_flask_running(url: str, timeout: int = 2) -> bool:
     """
     try:
         response = requests.get(url, timeout=timeout)
-        return response.status_code == 200  # type: ignore[no-any-return]
+        return response.status_code == 200
     except Exception:
         return False
 

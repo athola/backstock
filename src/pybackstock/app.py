@@ -85,7 +85,7 @@ def render_index_template(
     Returns:
         Rendered HTML template.
     """
-    return render_template(  # type: ignore[no-any-return]
+    return render_template(
         "index.html",
         errors=errors,
         items=items,
@@ -248,7 +248,7 @@ def get_matching_items(search_column: str, search_item: str) -> Query[Any] | dic
         if not search_item.isdigit():
             return {}
         column = Grocery.id if search_column == "id" else Grocery.x_for
-        return Grocery.query.filter(column == int(search_item))
+        return Grocery.query.filter(column == int(search_item))  # type: ignore[no-any-return]
 
     # Build search term based on input
     if "*" in search_item or "_" in search_item:
@@ -264,7 +264,7 @@ def get_matching_items(search_column: str, search_item: str) -> Query[Any] | dic
     else:
         query = Grocery.query.filter(getattr(Grocery, search_column).ilike(search_term))
 
-    return query.order_by(Grocery.id)
+    return query.order_by(Grocery.id)  # type: ignore[no-any-return]
 
 
 def set_item() -> Grocery:
