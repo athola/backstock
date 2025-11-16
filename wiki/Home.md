@@ -4,7 +4,7 @@ Welcome to the Backstock documentation wiki.
 
 ## Quick Links
 
-### 🚀 Deployment
+### Deployment
 - **[Deployment Overview](deployment/README.md)** - Start here for deployment
 - **[Render Setup](deployment/Render-Setup.md)** - Initial deployment guide
 - **[Database Rotation](deployment/Database-Rotation.md)** - 90-day rotation process
@@ -12,7 +12,7 @@ Welcome to the Backstock documentation wiki.
 - **[Troubleshooting](deployment/Troubleshooting.md)** - Common issues
 - **[Quick Reference](deployment/Quick-Reference.md)** - Commands and checklists
 
-### 🏗️ Architecture
+### Architecture
 - **[Architecture Overview](architecture/README.md)** - Architecture decisions
 - **[ADR-0001: Security Controls](architecture/ADR-0001-implement-comprehensive-security-controls.md)** - Security implementation
 

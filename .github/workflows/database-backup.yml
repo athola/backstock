@@ -60,22 +60,22 @@ jobs:
           tag_name: backup-${{ github.run_number }}-${{ github.run_id }}
           name: Database Backup - ${{ steps.backup_info.outputs.date }}
           body: |
-            ## 💾 Automated Database Backup
+            ## Automated Database Backup
 
             **Date:** ${{ steps.backup_info.outputs.date }}
             **Size:** ${{ steps.backup_info.outputs.size }}
             **Trigger:** ${{ github.event_name == 'schedule' && 'Scheduled (Weekly)' || 'Manual' }}
             ${{ github.event.inputs.reason && format('**Reason:** {0}', github.event.inputs.reason) || '' }}
 
-            ### ⚠️ Database Expiration Reminder
+            ### Database Expiration Reminder
             Render free databases expire after **90 days** from creation.
 
-            ### 📋 Restore Instructions
+            ### Restore Instructions
             1. Download the backup file from this release
             2. Set your new DATABASE_URL: `export DATABASE_URL="postgresql://..."`
             3. Restore: `./scripts/restore_database.sh <downloaded_file>`
 
-            ### 🔄 90-Day Rotation Process
+            ### 90-Day Rotation Process
             See `docs/RENDER_DEPLOYMENT.md` for complete instructions on the database rotation process.
           files: |
             backups/*.sql.gz
@@ -86,7 +86,7 @@ jobs:
 
       - name: Cleanup old artifacts
         run: |
-          echo "🧹 Backup artifacts are automatically cleaned up after 90 days"
+          echo "Backup artifacts are automatically cleaned up after 90 days"
           echo "   GitHub Actions will remove artifacts older than the retention period"
 
   notify:
@@ -99,9 +99,9 @@ jobs:
       - name: Check backup status
         run: |
           if [ "${{ needs.backup.result }}" == "success" ]; then
-            echo "✅ Database backup completed successfully"
+            echo "Database backup completed successfully"
           else
-            echo "❌ Database backup failed"
+            echo "Database backup failed"
             exit 1
           fi
 
@@ -109,7 +109,7 @@ jobs:
         run: |
           echo ""
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-          echo "📅 DATABASE ROTATION SCHEDULE"
+          echo "DATABASE ROTATION SCHEDULE"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
           echo "Render free databases expire after 90 days"
