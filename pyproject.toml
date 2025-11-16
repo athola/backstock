@@ -7,6 +7,8 @@ dependencies = [
     "flask>=3.0.0",
     "flask-sqlalchemy>=3.1.0",
     "flask-migrate>=4.0.0",
+    "flask-wtf>=1.2.0",
+    "flask-talisman>=1.1.0",
     "sqlalchemy>=2.0.0",
     "alembic>=1.13.0",
     "psycopg2-binary>=2.9.9",
@@ -25,6 +27,7 @@ dev = [
     "mypy>=1.11.0",
     "ty",
     "types-requests>=2.32.0",
+    "playwright>=1.40.0",
 ]
 
 [tool.ruff]
@@ -109,6 +112,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["S101", "D103", "ANN201", "ANN401", "PLR2004", "PLC0415", "PT001", "ARG001", "F401", "E501"]
+"demo/*" = ["T201", "S603", "S607", "PLR2004", "D103", "ANN401", "DTZ005", "FBT001", "FBT002", "TRY300", "BLE001"]
 "migrations/*" = ["D", "ANN", "INP001"]
 "inventoryApp.py" = ["FBT001", "ANN401"]
 "models.py" = ["DTZ007"]
@@ -155,11 +159,13 @@ warn_unused_ignores = true
 warn_no_return = true
 strict_equality = true
 plugins = ["sqlalchemy.ext.mypy.plugin"]
-exclude = ["migrations/", "tests/"]
+exclude = ["migrations/"]
 
 [[tool.mypy.overrides]]
 module = [
     "flask_migrate",
     "flask_script",
+    "flask_talisman",
+    "flask_wtf.csrf",
 ]
 ignore_missing_imports = true

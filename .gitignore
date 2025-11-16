@@ -113,3 +113,29 @@ deactivate
 
 # mypy
 .mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Demo artifacts
+demo_screenshots/
+demo.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Playwright
+.playwright/
+playwright-report/
+test-results/

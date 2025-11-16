@@ -19,6 +19,7 @@
 	    <div class="col-xs-2 text-left">
 	      <div class="previous">
 		    <form role="form" name="add-csv-form" method='POST' action='/' enctype="multipart/form-data">
+		      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		      <div class="form-group">
 			    <label for="csv-input">Add .csv:</label>
 			    <input type="file" class="form-control-file" name="csv-input" id="csv">
@@ -30,6 +31,7 @@
 	    <div class="col-xs-2 text-center">
           <div class="next">
 	        <form role="form" name="add-item-form" method='POST' action='/'>
+	          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		      <button name="add-item" id="add" type="submit" class="btn btn-primary btn-block" style="align: center; background-color: #CE2029; margin-top: 5px; max-width: 200px;">Add Item</button>
 	        </form>
 		  </div>
@@ -37,6 +39,7 @@
 		<div class="col-xs-2 text-right">
           <div class="next">
 	        <form role="form" name="search-item-form" method='POST' action='/'>
+	          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		      <button name="search-item" id="search" type="submit" class="btn btn-primary btn-block" style="background-color: #CE2029; margin-top: 5px; max-width: 200px;">Search Item</button>
 	        </form>
 		  </div>
@@ -46,6 +49,7 @@
 	  <br>
 	  {% if loading_search %}
         <form role="form" name="search-form" method='POST' action='/'>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 	      <div class="form-group">
             <label for="search-type" style="max-width: 505px;">Search By:</label>
             <select class="form-control" name="column" id="column-type" style="max-width: 500px;">
@@ -68,6 +72,7 @@
         <br>
 	  {% elif loading_add_item %}
 	    <form role="form" name="add-form" method='POST' action='/'>
+	      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 		  <div class="form-group">
 		    <label for="id-add" style="max-width: 505px;">ID:</label>
 		    <input type="text" name="id-add" class="form-control" id="add-id" placeholder="Enter ID" style="max-width: 500px;" autofocus required>

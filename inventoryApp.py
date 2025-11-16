@@ -11,6 +11,8 @@ from typing import TYPE_CHECKING, Any
 
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_talisman import Talisman
+from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 
 if TYPE_CHECKING:
@@ -20,6 +22,24 @@ if TYPE_CHECKING:
 app = Flask(__name__)
 app.config.from_object(os.environ.get("APP_SETTINGS", "config.DevelopmentConfig"))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize security extensions
+csrf = CSRFProtect(app)
+
+# Configure Talisman for security headers
+# Disable HTTPS enforcement in development and testing, enable in production
+is_production = not app.config.get("DEBUG", False) and not app.config.get("TESTING", False)
+talisman = Talisman(
+    app,
+    force_https=is_production,
+    strict_transport_security=is_production,
+    content_security_policy={
+        "default-src": "'self'",
+        "script-src": ["'self'", "'unsafe-inline'", "code.jquery.com", "netdna.bootstrapcdn.com"],
+        "style-src": ["'self'", "'unsafe-inline'", "netdna.bootstrapcdn.com"],
+    },
+)
+
 db = SQLAlchemy(app)
 
 # Import models after db is created to avoid circular import
@@ -195,12 +215,14 @@ def report_exception(ex: Exception, error_type: str, errors: list[str]) -> list[
     Returns:
         Updated list of errors.
     """
+    # Log detailed error information server-side for debugging
     exc_tb = sys.exc_info()[-1]
     tb_lineno: int | str = exc_tb.tb_lineno if exc_tb is not None else "unknown"
-    error_str = f"{error_type}{ex!s} - Error on line no: {tb_lineno}"
-    errors.append(error_str)
-    for error in errors:
-        print(error)  # noqa: T201
+    detailed_error = f"{error_type}{ex!s} - Error on line no: {tb_lineno}"
+    print(detailed_error)  # noqa: T201
+
+    # Show generic error message to user (don't expose internal details)
+    errors.append(error_type.strip())
     return errors
 
 
@@ -213,11 +235,11 @@ def get_matching_items(search_column: str, search_item: str) -> Query[Any] | dic
 
     Returns:
         Query result with matching items or empty dict.
-    """
-    # Basic SQL injection protection
-    if "DROP TABLE" in search_item:
-        return {}
 
+    Note:
+        SQLAlchemy ORM provides SQL injection protection through parameterized queries.
+        No manual SQL injection checks are needed.
+    """
     # Handle exact integer searches for id and x_for columns
     if search_column in ("id", "x_for"):
         if not search_item.isdigit():
