@@ -5,11 +5,11 @@
 services:
   # Web Service - Flask Application
   - type: web
-    name: backstock
+    name: pybackstock
     runtime: python
     plan: free
     buildCommand: "pip install uv && uv pip install -r requirements.txt"
-    startCommand: "gunicorn 'src.backstock.app:app'"
+    startCommand: "gunicorn 'src.pybackstock.app:app'"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.14
@@ -19,7 +19,7 @@ services:
         generateValue: true
       - key: DATABASE_URL
         fromDatabase:
-          name: backstock-db
+          name: pybackstock-db
           property: connectionString
     healthCheckPath: /
     autoDeploy: true
@@ -27,7 +27,7 @@ services:
 
 databases:
   # PostgreSQL Database - Free Tier (1GB, 90-day expiration)
-  - name: backstock-db
+  - name: pybackstock-db
     plan: free
-    databaseName: backstock
-    user: backstock
+    databaseName: pybackstock
+    user: pybackstock

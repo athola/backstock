@@ -22,8 +22,8 @@ if [ -z "$1" ]; then
     echo "Usage: $0 <backup_file>"
     echo ""
     echo "Example:"
-    echo "  $0 backups/backstock_backup_20250116_120000.sql"
-    echo "  $0 backups/backstock_backup_20250116_120000.sql.gz"
+    echo "  $0 backups/pybackstock_backup_20250116_120000.sql"
+    echo "  $0 backups/pybackstock_backup_20250116_120000.sql.gz"
     exit 1
 fi
 

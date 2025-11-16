@@ -25,7 +25,7 @@ def main():
 
     # Generate backup filename with timestamp
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    backup_file = backup_dir / f"backstock_backup_{timestamp}.sql"
+    backup_file = backup_dir / f"pybackstock_backup_{timestamp}.sql"
 
     print("Starting database backup...")
     print(f"Backup file: {backup_file}")

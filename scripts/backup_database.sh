@@ -13,7 +13,7 @@ set -e  # Exit on error
 # Configuration
 BACKUP_DIR="${1:-./backups}"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_FILE="${BACKUP_DIR}/backstock_backup_${TIMESTAMP}.sql"
+BACKUP_FILE="${BACKUP_DIR}/pybackstock_backup_${TIMESTAMP}.sql"
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -63,7 +63,7 @@ fi
 # Clean up old backups (keep last 5)
 echo -e "${YELLOW}Cleaning up old backups...${NC}"
 cd "$BACKUP_DIR"
-ls -t backstock_backup_*.sql* 2>/dev/null | tail -n +6 | xargs -r rm
+ls -t pybackstock_backup_*.sql* 2>/dev/null | tail -n +6 | xargs -r rm
 echo -e "${GREEN}Cleanup complete${NC}"
 
 echo ""

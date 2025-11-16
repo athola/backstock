@@ -1,6 +1,6 @@
-"""Interactive demo of the Backstock App using Playwright.
+"""Interactive demo of the PyBackstock App using Playwright.
 
-This script demonstrates the core features of the backstock inventory management application
+This script demonstrates the core features of the pybackstock inventory management application
 by automating browser interactions with Playwright.
 
 Enhanced with:
@@ -191,7 +191,7 @@ def verify_flask_running(url: str, timeout: int = 2) -> bool:
     """
     try:
         response = requests.get(url, timeout=timeout)
-        return response.status_code == 200
+        return response.status_code == 200  # type: ignore[no-any-return]
     except Exception:
         return False
 
@@ -283,7 +283,7 @@ class DemoRunner:
             env={
                 **subprocess.os.environ,  # type: ignore[attr-defined]
                 "DATABASE_URL": "sqlite:///demo.db",
-                "APP_SETTINGS": "src.backstock.config.DevelopmentConfig",
+                "APP_SETTINGS": "src.pybackstock.config.DevelopmentConfig",
             },
         )
 

@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from src.backstock.config import (
+from src.pybackstock.config import (
     Config,
     DevelopmentConfig,
     ProductionConfig,
@@ -58,10 +58,10 @@ def test_database_url_conversion() -> None:
     os.environ["DATABASE_URL"] = "postgres://user:pass@localhost/db"
 
     # Need to reload the module to pick up new environment variable
-    if "src.backstock.config" in sys.modules:
-        del sys.modules["src.backstock.config"]
+    if "src.pybackstock.config" in sys.modules:
+        del sys.modules["src.pybackstock.config"]
 
-    from src.backstock.config import Config  # noqa: PLC0415 - Must import after env var manipulation
+    from src.pybackstock.config import Config  # noqa: PLC0415 - Must import after env var manipulation
 
     assert Config.SQLALCHEMY_DATABASE_URI.startswith("postgresql://")
     assert "user:pass@localhost/db" in Config.SQLALCHEMY_DATABASE_URI
@@ -73,9 +73,9 @@ def test_database_url_conversion() -> None:
         del os.environ["DATABASE_URL"]
 
     # Reload module again to restore original state
-    if "src.backstock.config" in sys.modules:
-        del sys.modules["src.backstock.config"]
-    importlib.import_module("src.backstock.config")
+    if "src.pybackstock.config" in sys.modules:
+        del sys.modules["src.pybackstock.config"]
+    importlib.import_module("src.pybackstock.config")
 
 
 @pytest.mark.unit
@@ -88,7 +88,7 @@ def test_secret_key_generation() -> None:
     else:
         old_key = None
 
-    from src.backstock.config import Config  # noqa: PLC0415 - Must import after env var manipulation
+    from src.pybackstock.config import Config  # noqa: PLC0415 - Must import after env var manipulation
 
     assert Config.SECRET_KEY is not None
     assert len(Config.SECRET_KEY) > 0

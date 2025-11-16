@@ -1,10 +1,10 @@
-"""Database models for the backstock application."""
+"""Database models for the pybackstock application."""
 
 from collections.abc import Iterator
 from datetime import date, datetime
 from typing import Any
 
-from src.backstock.app import db
+from src.pybackstock.app import db
 
 
 class Grocery(db.Model):  # type: ignore[name-defined]

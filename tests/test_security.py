@@ -1,4 +1,4 @@
-"""Security tests for the backstock application."""
+"""Security tests for the pybackstock application."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 
-from src.backstock import app as flask_app
+from src.pybackstock import app as flask_app
 
 
 @pytest.fixture()
@@ -209,8 +209,8 @@ class TestInputValidation:
         import importlib.util  # noqa: PLC0415 - Dynamic import needed for source code inspection
         from pathlib import Path  # noqa: PLC0415 - Only used in this test
 
-        app_module_path = Path("src/backstock/app.py").resolve()
-        spec = importlib.util.spec_from_file_location("src.backstock.app", app_module_path)
+        app_module_path = Path("src/pybackstock/app.py").resolve()
+        spec = importlib.util.spec_from_file_location("src.pybackstock.app", app_module_path)
         if spec and spec.loader:
             app_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(app_module)
