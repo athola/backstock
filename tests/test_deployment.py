@@ -510,8 +510,7 @@ def test_render_yaml_database_url_configured() -> None:
 
     # Verify DATABASE_URL is configured
     assert database_url_var is not None, (
-        "DATABASE_URL environment variable not found in render.yaml. "
-        "This will cause deployment failure."
+        "DATABASE_URL environment variable not found in render.yaml. This will cause deployment failure."
     )
 
     # Verify it's linked to a database service
@@ -588,9 +587,7 @@ def test_config_uses_postgresql_when_database_url_set() -> None:
         assert test_db_url == config_class.SQLALCHEMY_DATABASE_URI, (
             "Config should use DATABASE_URL when set, not fallback to SQLite"
         )
-        assert "postgresql://" in config_class.SQLALCHEMY_DATABASE_URI, (
-            "Production should use PostgreSQL, not SQLite"
-        )
+        assert "postgresql://" in config_class.SQLALCHEMY_DATABASE_URI, "Production should use PostgreSQL, not SQLite"
         assert "sqlite:///" not in config_class.SQLALCHEMY_DATABASE_URI, (
             "Should not use SQLite fallback when DATABASE_URL is set"
         )
@@ -630,16 +627,12 @@ def test_production_config_with_database_url() -> None:
         prod_config = config_module.ProductionConfig
 
         # Verify ProductionConfig inherits and uses DATABASE_URL correctly
-        assert hasattr(prod_config, "SQLALCHEMY_DATABASE_URI"), (
-            "ProductionConfig must have SQLALCHEMY_DATABASE_URI"
-        )
+        assert hasattr(prod_config, "SQLALCHEMY_DATABASE_URI"), "ProductionConfig must have SQLALCHEMY_DATABASE_URI"
         assert production_db_url == prod_config.SQLALCHEMY_DATABASE_URI, (
             "ProductionConfig should use DATABASE_URL from environment"
         )
         assert prod_config.DEBUG is False, "ProductionConfig should have DEBUG=False"
-        assert prod_config.SESSION_COOKIE_SECURE is True, (
-            "ProductionConfig should require HTTPS for session cookies"
-        )
+        assert prod_config.SESSION_COOKIE_SECURE is True, "ProductionConfig should require HTTPS for session cookies"
     finally:
         # Restore original DATABASE_URL
         if original_db_url is not None:
