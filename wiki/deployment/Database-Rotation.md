@@ -94,7 +94,7 @@ ls -lh backups/
    ```
 2. Start application:
    ```bash
-   python manage.py runserver
+   python scripts/manage.py runserver
    ```
 3. Test features:
    - Search items

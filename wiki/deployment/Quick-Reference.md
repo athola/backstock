@@ -24,7 +24,7 @@ Checklists and common commands for Backstock deployment.
 
 ### Day 88: Test
 - [ ] Update local `.env` with new DATABASE_URL
-- [ ] `python manage.py runserver`
+- [ ] `python scripts/manage.py runserver`
 - [ ] Test: Search, Add Item, Upload CSV
 - [ ] Confirm data matches production
 
@@ -75,7 +75,7 @@ psql $DATABASE_URL -c "SELECT COUNT(*) FROM grocery_items;"
 psql $DATABASE_URL -c "\dt"
 
 # Run migrations
-python manage.py db upgrade
+python scripts/manage.py db upgrade
 ```
 
 ### Backup & Restore
@@ -123,10 +123,10 @@ make demo
 uv sync --all-extras
 
 # Run local server
-python manage.py runserver
+python scripts/manage.py runserver
 
 # Run with gunicorn
-gunicorn 'src.backstock.app:app'
+gunicorn 'src.pybackstock.app:app'
 
 # Set environment
 export APP_SETTINGS=config.DevelopmentConfig

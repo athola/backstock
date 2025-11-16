@@ -410,7 +410,7 @@ Common issues and solutions for Render deployment.
 3. **Verify migrations:**
    ```bash
    # If database schema outdated
-   python manage.py db upgrade
+   python scripts/manage.py db upgrade
    ```
 
 4. **Check SECRET_KEY:**

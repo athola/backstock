@@ -76,7 +76,7 @@ jobs:
             3. Restore: `./scripts/restore_database.sh <downloaded_file>`
 
             ### 90-Day Rotation Process
-            See `docs/RENDER_DEPLOYMENT.md` for complete instructions on the database rotation process.
+            See `wiki/deployment/Database-Rotation.md` for complete instructions on the database rotation process.
           files: |
             backups/*.sql.gz
           draft: false
@@ -123,4 +123,4 @@ jobs:
           echo "  • Day 89:    Update DATABASE_URL in secrets"
           echo "  • Day 90:    Delete old database"
           echo ""
-          echo "See docs/RENDER_DEPLOYMENT.md for detailed steps"
+          echo "See wiki/deployment/Database-Rotation.md for detailed steps"
