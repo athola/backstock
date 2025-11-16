@@ -28,6 +28,7 @@ dev = [
     "ty",
     "types-requests>=2.32.0",
     "playwright>=1.40.0",
+    "pyyaml>=6.0.0",
 ]
 
 [tool.ruff]
