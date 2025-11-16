@@ -14,7 +14,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.14
       - key: APP_SETTINGS
-        value: config.ProductionConfig
+        value: src.pybackstock.config.ProductionConfig
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL

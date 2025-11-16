@@ -44,12 +44,12 @@ cp .env.example .env
 
 **To run locally** (with virtual environment activated):
 ```bash
-python manage.py runserver
+python scripts/manage.py runserver
 ```
 
 Or using gunicorn (production-like):
 ```bash
-gunicorn "src.backstock.app:app"
+gunicorn "src.pybackstock.app:app"
 ```
 
 The app will run on http://127.0.0.1:5000/
@@ -124,17 +124,17 @@ This database uses PostgreSQL with SQLAlchemy 2.0 ORM.
 
 Initialize the database:
 ```bash
-python manage.py db init
+python scripts/manage.py db init
 ```
 
 Create a migration:
 ```bash
-python manage.py db migrate
+python scripts/manage.py db migrate
 ```
 
 Apply migrations:
 ```bash
-python manage.py db upgrade
+python scripts/manage.py db upgrade
 ```
 
 ## PostgreSQL Database Commands

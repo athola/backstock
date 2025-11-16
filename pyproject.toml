@@ -165,8 +165,8 @@ warn_unused_ignores = true
 warn_no_return = true
 strict_equality = true
 # plugins = ["sqlalchemy.ext.mypy.plugin"]
-files = ["src/pybackstock", "tests", "manage.py"]
-exclude = ["migrations/", "demo/", "scripts/"]
+files = ["src/pybackstock", "tests", "scripts/manage.py"]
+exclude = ["migrations/", "demo/"]
 
 [[tool.mypy.overrides]]
 module = [

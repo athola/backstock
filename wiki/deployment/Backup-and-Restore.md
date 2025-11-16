@@ -100,7 +100,7 @@ Restore process complete!
 
 Next steps:
   1. Verify data with: psql $DATABASE_URL -c 'SELECT COUNT(*) FROM grocery_items;'
-  2. Run migrations if needed: python manage.py db upgrade
+  2. Run migrations if needed: python scripts/manage.py db upgrade
 ```
 
 ### Using psql Directly
@@ -136,7 +136,7 @@ psql $DATABASE_URL -c "SELECT * FROM grocery_items LIMIT 5;"
 After restoring, apply any pending migrations:
 
 ```bash
-python manage.py db upgrade
+python scripts/manage.py db upgrade
 ```
 
 ## Backup Storage

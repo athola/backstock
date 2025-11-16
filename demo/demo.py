@@ -277,7 +277,7 @@ class DemoRunner:
         print("Starting Flask application...")
 
         self.flask_process = subprocess.Popen(
-            [sys.executable, "manage.py"],
+            [sys.executable, "scripts/manage.py"],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             env={
