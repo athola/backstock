@@ -76,7 +76,7 @@ class DemoReport:
         ]
 
         for i, action in enumerate(self.actions, 1):
-            status_symbol = "✓" if action["status"] == "success" else "✗"
+            status_symbol = "[OK]" if action["status"] == "success" else "[FAILED]"
             summary.append(f"  {i}. {status_symbol} {action['action']}: {action['message']}")
 
         summary.append("=" * 70 + "\n")
@@ -287,7 +287,7 @@ class DemoRunner:
             msg = "Flask failed to start within timeout period"
             raise RuntimeError(msg)
 
-        print(f"✓ Flask started successfully on {self.url}\n")
+        print(f"[OK] Flask started successfully on {self.url}\n")
         self.report.add_action("Flask Startup", "success", "Application started successfully")
 
     def stop_flask(self) -> None:
@@ -304,9 +304,9 @@ class DemoRunner:
 
         if not self.keep_db:
             cleanup_demo_database()
-            print("✓ Demo database cleaned up")
+            print("[OK] Demo database cleaned up")
         else:
-            print("✓ Demo database preserved (demo.db)")
+            print("[OK] Demo database preserved (demo.db)")
 
     def demo_search_functionality(self, page: Page) -> None:
         """Demonstrate the search functionality."""
@@ -333,10 +333,10 @@ class DemoRunner:
                 capture_screenshot(page, "search_results")
 
             if page.query_selector(".result-item, table"):
-                print("   ✓ Search results displayed successfully")
+                print("   [OK] Search results displayed successfully")
                 self.report.add_action("Search Items", "success", "Searched for items by description")
             else:
-                print("   ℹ No items found (database may be empty)")
+                print("   [INFO] No items found (database may be empty)")
                 self.report.add_action("Search Items", "success", "Search completed (no results)")
 
             time.sleep(self.delay)
@@ -384,7 +384,7 @@ class DemoRunner:
             if self.screenshots:
                 capture_screenshot(page, "item_added")
 
-            print("   ✓ Form submitted")
+            print("   [OK] Form submitted")
             self.report.add_action("Add Item", "success", "Added demo product to inventory")
             time.sleep(self.delay)
         except Exception as e:
@@ -409,7 +409,7 @@ class DemoRunner:
                 print("   Note: The application accepts CSV files with inventory data")
                 self.report.add_action("CSV Upload View", "success", "CSV upload form displayed")
             else:
-                print("   ℹ CSV upload form not found on this page")
+                print("   [INFO] CSV upload form not found on this page")
                 self.report.add_action("CSV Upload View", "success", "Checked CSV functionality")
 
             time.sleep(self.delay * 1.5)
@@ -436,7 +436,7 @@ class DemoRunner:
                     if self.screenshots:
                         capture_screenshot(page, f"view_{view_name.replace(' ', '_')}")
 
-            print("   ✓ Navigation demonstration complete")
+            print("   [OK] Navigation demonstration complete")
             self.report.add_action("Navigation", "success", "Demonstrated view switching")
             time.sleep(self.delay)
         except Exception as e:
@@ -449,11 +449,11 @@ class DemoRunner:
         print("  INVENTORY APP - INTERACTIVE DEMONSTRATION")
         print("=" * 70)
         print(f"\nConfiguration:")
-        print(f"  • Mode: {'Headless' if self.headless else 'Headed'}")
-        print(f"  • Speed: {self.speed}")
-        print(f"  • Screenshots: {'Enabled' if self.screenshots else 'Disabled'}")
-        print(f"  • Keep DB: {'Yes' if self.keep_db else 'No'}")
-        print(f"  • Port: {self.port}\n")
+        print(f"  * Mode: {'Headless' if self.headless else 'Headed'}")
+        print(f"  * Speed: {self.speed}")
+        print(f"  * Screenshots: {'Enabled' if self.screenshots else 'Disabled'}")
+        print(f"  * Keep DB: {'Yes' if self.keep_db else 'No'}")
+        print(f"  * Port: {self.port}\n")
 
         try:
             self.start_flask()
@@ -489,7 +489,7 @@ class DemoRunner:
                 browser.close()
 
         except Exception as e:
-            print(f"\n✗ Demo encountered an error: {e}")
+            print(f"\n[ERROR] Demo encountered an error: {e}")
             self.report.add_action("Demo Execution", "failed", str(e))
             raise
         finally:

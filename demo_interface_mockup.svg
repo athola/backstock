@@ -6,7 +6,7 @@
   <!-- Browser Chrome -->
   <rect width="1280" height="40" fill="#e0e0e0"/>
   <text x="20" y="25" font-family="Arial, sans-serif" font-size="14" fill="#666">
-    ● ● ● http://127.0.0.1:5000
+    * * * http://127.0.0.1:5000
   </text>
 
   <!-- Main Container -->
@@ -57,7 +57,7 @@
     <!-- Dropdown -->
     <rect x="60" y="330" width="500" height="35" fill="white" stroke="#ccc" stroke-width="1" rx="4"/>
     <text x="75" y="353" font-family="Arial, sans-serif" font-size="14" fill="#333">
-      description ▼
+      description v
     </text>
 
     <!-- Search Input -->
