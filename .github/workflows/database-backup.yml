@@ -1,0 +1,126 @@
+name: Database Backup
+
+on:
+  schedule:
+    # Run every Monday at 2 AM UTC (weekly backups)
+    - cron: '0 2 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      reason:
+        description: 'Reason for manual backup'
+        required: false
+        default: 'Manual backup'
+
+jobs:
+  backup:
+    name: Backup PostgreSQL Database
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create backup
+        env:
+          DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+        run: |
+          python scripts/automated_backup.py
+
+      - name: Get backup info
+        id: backup_info
+        run: |
+          BACKUP_FILE=$(ls -t backups/*.sql.gz | head -n 1)
+          BACKUP_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+          BACKUP_DATE=$(date '+%Y-%m-%d %H:%M:%S UTC')
+          echo "file=$BACKUP_FILE" >> $GITHUB_OUTPUT
+          echo "size=$BACKUP_SIZE" >> $GITHUB_OUTPUT
+          echo "date=$BACKUP_DATE" >> $GITHUB_OUTPUT
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ github.run_number }}
+          path: backups/*.sql.gz
+          retention-days: 90  # Keep for 90 days
+
+      - name: Create Release with Backup
+        if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: backup-${{ github.run_number }}-${{ github.run_id }}
+          name: Database Backup - ${{ steps.backup_info.outputs.date }}
+          body: |
+            ## 💾 Automated Database Backup
+
+            **Date:** ${{ steps.backup_info.outputs.date }}
+            **Size:** ${{ steps.backup_info.outputs.size }}
+            **Trigger:** ${{ github.event_name == 'schedule' && 'Scheduled (Weekly)' || 'Manual' }}
+            ${{ github.event.inputs.reason && format('**Reason:** {0}', github.event.inputs.reason) || '' }}
+
+            ### ⚠️ Database Expiration Reminder
+            Render free databases expire after **90 days** from creation.
+
+            ### 📋 Restore Instructions
+            1. Download the backup file from this release
+            2. Set your new DATABASE_URL: `export DATABASE_URL="postgresql://..."`
+            3. Restore: `./scripts/restore_database.sh <downloaded_file>`
+
+            ### 🔄 90-Day Rotation Process
+            See `docs/RENDER_DEPLOYMENT.md` for complete instructions on the database rotation process.
+          files: |
+            backups/*.sql.gz
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cleanup old artifacts
+        run: |
+          echo "🧹 Backup artifacts are automatically cleaned up after 90 days"
+          echo "   GitHub Actions will remove artifacts older than the retention period"
+
+  notify:
+    name: Backup Status Notification
+    runs-on: ubuntu-latest
+    needs: backup
+    if: always()
+
+    steps:
+      - name: Check backup status
+        run: |
+          if [ "${{ needs.backup.result }}" == "success" ]; then
+            echo "✅ Database backup completed successfully"
+          else
+            echo "❌ Database backup failed"
+            exit 1
+          fi
+
+      - name: Database rotation reminder
+        run: |
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📅 DATABASE ROTATION SCHEDULE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Render free databases expire after 90 days"
+          echo ""
+          echo "Recommended schedule:"
+          echo "  • Day 1-85:  Normal operation"
+          echo "  • Day 85:    Create final backup"
+          echo "  • Day 86:    Create new database on Render"
+          echo "  • Day 87:    Restore backup to new database"
+          echo "  • Day 88:    Test and verify"
+          echo "  • Day 89:    Update DATABASE_URL in secrets"
+          echo "  • Day 90:    Delete old database"
+          echo ""
+          echo "See docs/RENDER_DEPLOYMENT.md for detailed steps"

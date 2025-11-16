@@ -122,6 +122,11 @@ deactivate
 *.sqlite
 *.sqlite3
 
+# Database backups
+backups/
+*.sql
+*.sql.gz
+
 # Demo artifacts
 demo_screenshots/
 demo.db

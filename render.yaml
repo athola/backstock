@@ -1,0 +1,33 @@
+# Render Blueprint for Backstock Application
+# This file defines the infrastructure for deploying on Render
+# See: https://render.com/docs/blueprint-spec
+
+services:
+  # Web Service - Flask Application
+  - type: web
+    name: backstock
+    runtime: python
+    plan: free
+    buildCommand: "pip install uv && uv pip install -r requirements.txt"
+    startCommand: "gunicorn 'src.backstock.app:app'"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.14
+      - key: APP_SETTINGS
+        value: config.ProductionConfig
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: backstock-db
+          property: connectionString
+    healthCheckPath: /
+    autoDeploy: true
+    branch: main
+
+databases:
+  # PostgreSQL Database - Free Tier (1GB, 90-day expiration)
+  - name: backstock-db
+    plan: free
+    databaseName: backstock
+    user: backstock

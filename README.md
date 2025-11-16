@@ -39,14 +39,12 @@ cp .env.example .env
 
 ### Running app:
 
-This app can be viewed via webserver hosted on heroku at the following addresses:
-Staging:
-https://inventory-app-stage.herokuapp.com/
+**Hosted Demo:**
+- Production: https://backstock.onrender.com (Render - Free Tier)
+- Legacy Heroku Staging: https://inventory-app-stage.herokuapp.com/
+- Legacy Heroku Production: https://inventory-app-pro.herokuapp.com/
 
-Production:
-https://inventory-app-pro.herokuapp.com/
-
-To run locally (with virtual environment activated):
+**To run locally** (with virtual environment activated):
 ```bash
 python manage.py runserver
 ```
@@ -163,7 +161,37 @@ Describe table structure:
 \d grocery_items
 ```
 
-## Deployment (Heroku)
+## Deployment
+
+### Render (Recommended - Free Tier)
+
+This application is configured for easy deployment on Render with automatic deployment from GitHub.
+
+**Quick Start:**
+1. Create account at [render.com](https://render.com)
+2. Connect your GitHub repository
+3. Click **New +** → **Blueprint**
+4. Select this repository (Render will detect `render.yaml`)
+5. Click **Apply** - Render handles the rest!
+
+**Features:**
+- Auto-deploy on push to `main` branch
+- Free PostgreSQL database (1GB)
+- Free SSL certificates
+- Automated weekly backups via GitHub Actions
+
+**Important:** Free Render databases expire after 90 days. See [docs/RENDER_DEPLOYMENT.md](docs/RENDER_DEPLOYMENT.md) for:
+- Complete deployment guide
+- Automated backup configuration
+- 90-day database rotation process
+- Troubleshooting tips
+
+**Your App URL:** `https://backstock.onrender.com` (or your assigned URL)
+
+### Heroku (Legacy)
+
+<details>
+<summary>Click to expand Heroku deployment instructions</summary>
 
 Check staging configuration:
 ```bash
@@ -192,6 +220,8 @@ heroku addons:create heroku-postgresql:hobby-dev --app inventory-app-pro
 git push pro main
 heroku run python manage.py db upgrade --app inventory-app-pro
 ```
+
+</details>
 
 ## Security Updates
 
