@@ -21,11 +21,25 @@ class Config:
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_DATABASE_URI = database_url
 
+    # Security settings
+    # Flask-WTF CSRF protection
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = None  # CSRF tokens don't expire
+
+    # File upload settings
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+
+    # Session security
+    SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+
 
 class ProductionConfig(Config):
     """Production environment configuration."""
 
     DEBUG = False
+    SESSION_COOKIE_SECURE = True  # Require HTTPS in production
 
 
 class StagingConfig(Config):
@@ -46,3 +60,4 @@ class TestingConfig(Config):
     """Testing environment configuration."""
 
     TESTING = True
+    WTF_CSRF_ENABLED = True  # Enable CSRF protection in tests to verify it works
