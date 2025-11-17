@@ -1,9 +1,12 @@
 """Integration tests for Flask routes."""
 
 import io
+import time
 
 import pytest
 from flask.testing import FlaskClient
+
+from src.pybackstock.app import app as flask_app
 
 
 @pytest.mark.integration
@@ -136,3 +139,91 @@ def test_search_by_department(client: FlaskClient, sample_grocery: None) -> None
     """Test searching by department."""
     response = client.post("/", data={"send-search": "", "column": "department", "item": "Test Dept"})
     assert response.status_code == 200
+
+
+@pytest.mark.integration
+def test_health_endpoint_get_request(client: FlaskClient) -> None:
+    """Test GET request to /health endpoint returns 200 OK.
+
+    This endpoint is used by Render.com for health checks and must return
+    a 2xx status code to indicate the service is healthy.
+    """
+    response = client.get("/health")
+    assert response.status_code == 200
+
+
+@pytest.mark.integration
+def test_health_endpoint_returns_json(client: FlaskClient) -> None:
+    """Test /health endpoint returns JSON response with status field.
+
+    The health endpoint should return a simple JSON response indicating
+    the service status, making it easy for monitoring systems to parse.
+    """
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+
+    # Parse JSON response
+    data = response.get_json()
+    assert data is not None, "Response should be valid JSON"
+    assert "status" in data, "Response should contain 'status' field"
+    assert data["status"] == "healthy", "Status should be 'healthy'"
+
+
+@pytest.mark.integration
+def test_health_endpoint_exempt_from_csrf(client: FlaskClient) -> None:
+    """Test /health endpoint is exempt from CSRF protection.
+
+    Health checks from Render.com and other monitoring services won't
+    include CSRF tokens, so this endpoint must be exempt.
+    """
+    # Create a client with CSRF enabled
+    original_csrf_setting = flask_app.config.get("WTF_CSRF_ENABLED")
+    try:
+        flask_app.config["WTF_CSRF_ENABLED"] = True
+        test_client = flask_app.test_client()
+
+        # GET request without CSRF token should still succeed
+        response = test_client.get("/health")
+        assert response.status_code == 200
+
+        # POST request without CSRF token should also succeed (for completeness)
+        response = test_client.post("/health")
+        assert response.status_code in (200, 405)  # 405 if POST not allowed
+    finally:
+        # Restore original setting
+        if original_csrf_setting is not None:
+            flask_app.config["WTF_CSRF_ENABLED"] = original_csrf_setting
+
+
+@pytest.mark.integration
+def test_health_endpoint_fast_response(client: FlaskClient) -> None:
+    """Test /health endpoint responds quickly.
+
+    Health checks should be lightweight and respond within milliseconds
+    to avoid timeout issues with health check systems.
+    """
+    start_time = time.time()
+    response = client.get("/health")
+    elapsed_time = time.time() - start_time
+
+    assert response.status_code == 200
+    # Should respond in less than 1 second (generous threshold for testing)
+    assert elapsed_time < 1.0, f"Health check took {elapsed_time:.3f}s, should be < 1s"
+
+
+@pytest.mark.integration
+def test_health_endpoint_no_database_dependency(client: FlaskClient) -> None:
+    """Test /health endpoint doesn't require database connection.
+
+    The health endpoint should be a simple liveness check that doesn't
+    depend on the database being available. This ensures health checks
+    can pass even if the database is temporarily unavailable.
+    """
+    # This test documents the expected behavior
+    # The health endpoint should not query the database
+    response = client.get("/health")
+    assert response.status_code == 200
+
+    # Verify it returns immediately without waiting for DB
+    # (already tested in test_health_endpoint_fast_response)

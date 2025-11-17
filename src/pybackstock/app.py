@@ -178,6 +178,25 @@ def handle_csv_action() -> tuple[list[str], list[Any]]:
     return errors, items
 
 
+@app.route("/health", methods=["GET"])
+@csrf.exempt
+@talisman(force_https=False)
+def health_check() -> tuple[dict[str, str], int]:
+    """Health check endpoint for monitoring and deployment platforms.
+
+    This endpoint is used by Render.com and other platforms to verify
+    the service is running and responsive. It must:
+    - Return 200 status code
+    - Be exempt from CSRF protection (monitoring systems don't send tokens)
+    - Be exempt from HTTPS forcing (health checks may come over HTTP internally)
+    - Respond quickly without database dependencies
+
+    Returns:
+        JSON response with status and HTTP 200 code.
+    """
+    return {"status": "healthy"}, 200
+
+
 @app.route("/", methods=["GET", "POST"])
 def index() -> str:
     """Handle the main index page for inventory management.

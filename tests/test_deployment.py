@@ -123,7 +123,7 @@ def test_health_check_path_configured() -> None:
 
     health_check_path = web_service.get("healthCheckPath")
     assert health_check_path is not None, "healthCheckPath is not configured"
-    assert health_check_path == "/", "healthCheckPath should be '/'"
+    assert health_check_path == "/health", "healthCheckPath should be '/health'"
 
 
 @pytest.mark.integration

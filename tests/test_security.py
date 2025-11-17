@@ -364,3 +364,45 @@ class TestProxyConfiguration:
             "ProxyFix must be configured BEFORE Talisman in app.py. "
             "Current order will cause Talisman to not recognize HTTPS connections."
         )
+
+
+class TestHealthEndpointSecurity:
+    """Test security configuration for the /health endpoint."""
+
+    def test_health_endpoint_exempt_from_https_forcing(self, client: Any) -> None:
+        """Test that /health endpoint does not enforce HTTPS.
+
+        Render.com's health checks may come over HTTP (internal routing),
+        so the health endpoint must not redirect to HTTPS or it will fail.
+        """
+        # Make a request without X-Forwarded-Proto header (simulating HTTP)
+        response = client.get("/health")
+
+        # Should not redirect (301/302) - should return 200
+        assert response.status_code == 200, (
+            "Health endpoint should not redirect to HTTPS. "
+            "Health checks from Render.com may come over HTTP and need to succeed."
+        )
+
+    def test_health_endpoint_works_with_https(self, client: Any) -> None:
+        """Test that /health endpoint also works with HTTPS requests.
+
+        While it shouldn't enforce HTTPS, it should still work when
+        accessed via HTTPS.
+        """
+        # Make a request with X-Forwarded-Proto header (simulating HTTPS)
+        response = client.get("/health", headers={"X-Forwarded-Proto": "https"})
+        assert response.status_code == 200
+
+    def test_health_endpoint_no_security_headers_interfere(self, client: Any) -> None:
+        """Test that security headers don't prevent health check access.
+
+        Ensure CSP, CSRF, and other security measures don't block the
+        health endpoint from responding to monitoring systems.
+        """
+        response = client.get("/health")
+        assert response.status_code == 200
+
+        # Should still have some security headers (from Talisman)
+        # but they shouldn't prevent the response
+        assert "X-Content-Type-Options" in response.headers
