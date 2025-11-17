@@ -776,6 +776,12 @@ def test_render_yaml_migrations_configured() -> None:
             # Verify script contains migration logic
             with open(startup_script_path) as f:
                 script_content = f.read()
-            assert "flask_migrate_upgrade" in script_content or "flask db upgrade" in script_content or "alembic upgrade" in script_content, (
-                "Startup script must contain migration logic (flask_migrate_upgrade, flask db upgrade, or alembic upgrade)"
+            has_migration_logic = (
+                "flask_migrate_upgrade" in script_content
+                or "flask db upgrade" in script_content
+                or "alembic upgrade" in script_content
+            )
+            assert has_migration_logic, (
+                "Startup script must contain migration logic "
+                "(flask_migrate_upgrade, flask db upgrade, or alembic upgrade)"
             )
