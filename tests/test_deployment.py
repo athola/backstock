@@ -54,12 +54,9 @@ def test_gunicorn_binding_configuration() -> None:
     assert start_command, "startCommand is missing in render.yaml web service"
 
     # If using a startup script, check the script instead
-    if "scripts/start.sh" in start_command or "scripts/start.py" in start_command:
+    if "scripts/start.py" in start_command:
         project_root = Path(__file__).parent.parent
-        if "start.sh" in start_command:
-            startup_script_path = project_root / "scripts" / "start.sh"
-        else:
-            startup_script_path = project_root / "scripts" / "start.py"
+        startup_script_path = project_root / "scripts" / "start.py"
         with open(startup_script_path) as f:
             script_content = f.read()
         command_to_check = script_content
@@ -98,12 +95,9 @@ def test_gunicorn_app_path() -> None:
     start_command = web_service.get("startCommand", "")
 
     # If using a startup script, check the script instead
-    if "scripts/start.sh" in start_command or "scripts/start.py" in start_command:
+    if "scripts/start.py" in start_command:
         project_root = Path(__file__).parent.parent
-        if "start.sh" in start_command:
-            startup_script_path = project_root / "scripts" / "start.sh"
-        else:
-            startup_script_path = project_root / "scripts" / "start.py"
+        startup_script_path = project_root / "scripts" / "start.py"
         with open(startup_script_path) as f:
             command_to_check = f.read()
     else:
@@ -208,12 +202,9 @@ def test_gunicorn_syntax() -> None:
     start_command = web_service.get("startCommand", "")
 
     # If using a startup script, check the script instead
-    if "scripts/start.sh" in start_command or "scripts/start.py" in start_command:
+    if "scripts/start.py" in start_command:
         project_root = Path(__file__).parent.parent
-        if "start.sh" in start_command:
-            startup_script_path = project_root / "scripts" / "start.sh"
-        else:
-            startup_script_path = project_root / "scripts" / "start.py"
+        startup_script_path = project_root / "scripts" / "start.py"
         with open(startup_script_path) as f:
             command_to_check = f.read()
     else:
@@ -773,7 +764,7 @@ def test_render_yaml_migrations_configured() -> None:
     )
 
     # Check if using startup script
-    uses_startup_script = "scripts/start.sh" in start_command or "scripts/start.py" in start_command
+    uses_startup_script = "scripts/start.py" in start_command
 
     # Check if migrations run inline in startCommand
     migrations_inline = "flask db upgrade" in start_command or "alembic upgrade head" in start_command
@@ -791,21 +782,19 @@ def test_render_yaml_migrations_configured() -> None:
     # If using startup script, verify it exists and contains migration logic
     if uses_startup_script:
         project_root = Path(__file__).parent.parent
-        if "start.sh" in start_command:
-            startup_script_path = project_root / "scripts" / "start.sh"
-            assert startup_script_path.exists(), (
-                f"Startup script not found at {startup_script_path}. "
-                "Create scripts/start.sh to run migrations before starting the app."
-            )
-            # Verify script contains migration logic
-            with open(startup_script_path) as f:
-                script_content = f.read()
-            has_migration_logic = (
-                "flask_migrate_upgrade" in script_content
-                or "flask db upgrade" in script_content
-                or "alembic upgrade" in script_content
-            )
-            assert has_migration_logic, (
-                "Startup script must contain migration logic "
-                "(flask_migrate_upgrade, flask db upgrade, or alembic upgrade)"
-            )
+        startup_script_path = project_root / "scripts" / "start.py"
+        assert startup_script_path.exists(), (
+            f"Startup script not found at {startup_script_path}. "
+            "Create scripts/start.py to run migrations before starting the app."
+        )
+        # Verify script contains migration logic
+        with open(startup_script_path) as f:
+            script_content = f.read()
+        has_migration_logic = (
+            "flask_migrate_upgrade" in script_content
+            or "flask db upgrade" in script_content
+            or "alembic upgrade" in script_content
+        )
+        assert has_migration_logic, (
+            "Startup script must contain migration logic (flask_migrate_upgrade, flask db upgrade, or alembic upgrade)"
+        )
