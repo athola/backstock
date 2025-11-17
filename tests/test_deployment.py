@@ -123,7 +123,7 @@ def test_health_check_path_configured() -> None:
 
     health_check_path = web_service.get("healthCheckPath")
     assert health_check_path is not None, "healthCheckPath is not configured"
-    assert health_check_path == "/", "healthCheckPath should be '/'"
+    assert health_check_path == "/health", "healthCheckPath should be '/health'"
 
 
 @pytest.mark.integration
@@ -924,16 +924,13 @@ def test_gunicorn_can_import_app_with_pythonpath() -> None:
 
         # Check that Gunicorn didn't fail with module import errors
         assert "ModuleNotFoundError: No module named 'src'" not in result.stderr, (
-            "Gunicorn failed to import 'src' package. "
-            "The --pythonpath parameter should add project root to sys.path."
+            "Gunicorn failed to import 'src' package. The --pythonpath parameter should add project root to sys.path."
         )
         assert "Failed to find application object 'app'" not in result.stderr, (
-            "Gunicorn failed to find Flask app object. "
-            "Check that src.pybackstock.app:app is correctly defined."
+            "Gunicorn failed to find Flask app object. Check that src.pybackstock.app:app is correctly defined."
         )
         assert "Exception in worker process" not in result.stderr or "ImportError" not in result.stderr, (
-            "Gunicorn worker failed with import error. "
-            "Verify --pythonpath is correctly configured."
+            "Gunicorn worker failed with import error. Verify --pythonpath is correctly configured."
         )
     except subprocess.TimeoutExpired:
         # Timeout is acceptable - we just want to verify it starts without import errors
@@ -958,17 +955,11 @@ def test_startup_script_preserves_project_root_for_gunicorn() -> None:
         script_content = f.read()
 
     # Verify project_root is defined
-    assert "project_root" in script_content, (
-        "Startup script must define project_root variable"
-    )
+    assert "project_root" in script_content, "Startup script must define project_root variable"
 
     # Verify project_root is used with --pythonpath
-    pythonpath_with_project_root = (
-        '"--pythonpath"' in script_content
-        and "str(project_root)" in script_content
-    ) or (
-        "'--pythonpath'" in script_content
-        and "str(project_root)" in script_content
+    pythonpath_with_project_root = ('"--pythonpath"' in script_content and "str(project_root)" in script_content) or (
+        "'--pythonpath'" in script_content and "str(project_root)" in script_content
     )
 
     assert pythonpath_with_project_root, (

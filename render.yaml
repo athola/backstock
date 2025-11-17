@@ -23,7 +23,7 @@ services:
         fromDatabase:
           name: pybackstock-db
           property: connectionString
-    healthCheckPath: /
+    healthCheckPath: /health
     autoDeploy: true
     branch: master
 
