@@ -11,7 +11,7 @@ services:
     buildCommand: "pip install uv && uv sync --frozen"
     # Note: preDeployCommand is not available on free tier
     # Using startup script to run migrations before gunicorn starts
-    startCommand: "bash scripts/start.sh"
+    startCommand: "python scripts/start.py"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.14

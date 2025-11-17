@@ -54,9 +54,12 @@ def test_gunicorn_binding_configuration() -> None:
     assert start_command, "startCommand is missing in render.yaml web service"
 
     # If using a startup script, check the script instead
-    if "scripts/start.sh" in start_command:
+    if "scripts/start.sh" in start_command or "scripts/start.py" in start_command:
         project_root = Path(__file__).parent.parent
-        startup_script_path = project_root / "scripts" / "start.sh"
+        if "start.sh" in start_command:
+            startup_script_path = project_root / "scripts" / "start.sh"
+        else:
+            startup_script_path = project_root / "scripts" / "start.py"
         with open(startup_script_path) as f:
             script_content = f.read()
         command_to_check = script_content
@@ -69,7 +72,15 @@ def test_gunicorn_binding_configuration() -> None:
     # Verify correct binding to all interfaces (0.0.0.0) and PORT env var
     assert "--bind" in command_to_check, "Gunicorn missing --bind flag"
     assert "0.0.0.0" in command_to_check, "Gunicorn not binding to 0.0.0.0 (all interfaces)"
-    assert "$PORT" in command_to_check or "${PORT}" in command_to_check, "Gunicorn not using $PORT environment variable"
+    # Check for PORT variable reference (shell-style or Python-style)
+    port_referenced = (
+        "$PORT" in command_to_check
+        or "${PORT}" in command_to_check
+        or 'os.environ.get("PORT"' in command_to_check
+        or "os.environ.get('PORT'" in command_to_check
+        or 'os.environ["PORT"]' in command_to_check
+    )
+    assert port_referenced, "Gunicorn not using PORT environment variable"
 
 
 @pytest.mark.integration
@@ -87,9 +98,12 @@ def test_gunicorn_app_path() -> None:
     start_command = web_service.get("startCommand", "")
 
     # If using a startup script, check the script instead
-    if "scripts/start.sh" in start_command:
+    if "scripts/start.sh" in start_command or "scripts/start.py" in start_command:
         project_root = Path(__file__).parent.parent
-        startup_script_path = project_root / "scripts" / "start.sh"
+        if "start.sh" in start_command:
+            startup_script_path = project_root / "scripts" / "start.sh"
+        else:
+            startup_script_path = project_root / "scripts" / "start.py"
         with open(startup_script_path) as f:
             command_to_check = f.read()
     else:
@@ -194,9 +208,12 @@ def test_gunicorn_syntax() -> None:
     start_command = web_service.get("startCommand", "")
 
     # If using a startup script, check the script instead
-    if "scripts/start.sh" in start_command:
+    if "scripts/start.sh" in start_command or "scripts/start.py" in start_command:
         project_root = Path(__file__).parent.parent
-        startup_script_path = project_root / "scripts" / "start.sh"
+        if "start.sh" in start_command:
+            startup_script_path = project_root / "scripts" / "start.sh"
+        else:
+            startup_script_path = project_root / "scripts" / "start.py"
         with open(startup_script_path) as f:
             command_to_check = f.read()
     else:
@@ -232,7 +249,15 @@ def test_gunicorn_syntax() -> None:
     if bind_idx is not None and bind_idx + 1 < len(parts):
         bind_address = parts[bind_idx + 1]
         assert "0.0.0.0" in bind_address, "Bind address should include 0.0.0.0"
-        assert "$PORT" in bind_address or "${PORT}" in bind_address, "Bind address should include $PORT variable"
+        # For Python scripts, check if PORT is referenced anywhere in the script
+        # For shell commands, check if $PORT is in the bind address
+        port_in_bind = "$PORT" in bind_address or "${PORT}" in bind_address
+        port_in_script = (
+            'os.environ.get("PORT"' in command_to_check
+            or "os.environ.get('PORT'" in command_to_check
+            or 'os.environ["PORT"]' in command_to_check
+        )
+        assert port_in_bind or port_in_script, "Bind address/script should reference PORT environment variable"
 
 
 @pytest.mark.integration
