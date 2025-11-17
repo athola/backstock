@@ -1,148 +1,378 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Backstock</title>
+    <meta charset="UTF-8">
+    <title>Backstock Inventory</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <style>
+      /* Global Styles */
+      body {
+        padding-bottom: 80px; /* Space for footer */
+        font-size: 16px; /* Better base font size for mobile */
+      }
+
       .container {
-        max-width: 1500px;
+        max-width: 1200px;
+        padding: 15px;
+      }
+
+      /* Header */
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+      }
+
+      h4 {
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+
+      /* Menu Buttons */
+      .menu-section {
+        margin-bottom: 30px;
+      }
+
+      .menu-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .menu-buttons > div {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .btn-menu {
+        background-color: #CE2029;
+        border-color: #CE2029;
+        color: white;
+        width: 100%;
+        min-height: 44px; /* Better touch target */
+        font-size: 16px;
+        padding: 10px 15px;
+      }
+
+      .btn-menu:hover,
+      .btn-menu:focus {
+        background-color: #a31920;
+        border-color: #a31920;
+        color: white;
+      }
+
+      /* CSV Upload Section */
+      .csv-upload {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+
+      .csv-upload label {
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .csv-upload input[type="submit"] {
+        margin-top: 10px;
+        min-height: 44px;
+        padding: 10px 20px;
+        background-color: #CE2029;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .csv-upload input[type="submit"]:hover {
+        background-color: #a31920;
+      }
+
+      /* Forms */
+      .form-section {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      .form-group label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+      }
+
+      .form-control {
+        width: 100%;
+        max-width: 100%;
+        min-height: 44px;
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: 10px;
+      }
+
+      select.form-control {
+        height: 44px;
+      }
+
+      .btn-success {
+        min-height: 44px;
+        padding: 10px 30px;
+        font-size: 16px;
+        margin-top: 10px;
+      }
+
+      /* Results Display */
+      .results-section {
+        margin-top: 20px;
+      }
+
+      .item-card {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+
+      .item-card h5 {
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+        word-wrap: break-word;
+      }
+
+      .item-detail {
+        margin: 5px 0;
+        font-size: 0.9rem;
+      }
+
+      .item-detail strong {
+        display: inline-block;
+        min-width: 120px;
+      }
+
+      /* Error Messages */
+      .error-message {
+        color: #d9534f;
+        background-color: #f2dede;
+        border: 1px solid #ebccd1;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 15px 0;
+      }
+
+      /* Success Messages */
+      .success-message {
+        color: #3c763d;
+        background-color: #dff0d8;
+        border: 1px solid #d6e9c6;
+        padding: 15px;
+        border-radius: 4px;
+        margin: 15px 0;
+      }
+
+      /* Footer */
+      .page-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 15px;
+        text-align: center;
+        font-size: 0.9rem;
+        z-index: 1000;
+      }
+
+      .page-footer p {
+        margin: 0;
+      }
+
+      /* Mobile Optimizations */
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        .menu-buttons {
+          flex-direction: column;
+        }
+
+        .menu-buttons > div {
+          width: 100%;
+          min-width: 100%;
+        }
+
+        .container {
+          padding: 10px;
+        }
+
+        .item-detail strong {
+          display: block;
+          margin-bottom: 2px;
+        }
+
+        .page-footer {
+          font-size: 0.8rem;
+          padding: 10px 5px;
+        }
+      }
+
+      /* Tablet Optimizations */
+      @media (min-width: 769px) and (max-width: 1024px) {
+        .menu-buttons > div {
+          min-width: calc(50% - 10px);
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>Backstock Inventory Application</h1>
-	  <br>
-      <h4>Menu:</h4>
-	  <div class="row" style="max-width: 1200px;">
-	    <div class="col-xs-2 text-left">
-	      <div class="previous">
-		    <form role="form" name="add-csv-form" method='POST' action='/' enctype="multipart/form-data">
-		      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		      <div class="form-group">
-			    <label for="csv-input">Add .csv:</label>
-			    <input type="file" class="form-control-file" name="csv-input" id="csv">
-				<input type="submit" name="csv-submit" />
-		      </div>
-		    </form>
-	      </div>
-	    </div>	  
-	    <div class="col-xs-2 text-center">
-          <div class="next">
-	        <form role="form" name="add-item-form" method='POST' action='/'>
-	          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		      <button name="add-item" id="add" type="submit" class="btn btn-primary btn-block" style="align: center; background-color: #CE2029; margin-top: 5px; max-width: 200px;">Add Item</button>
-	        </form>
-		  </div>
-		</div>
-		<div class="col-xs-2 text-right">
-          <div class="next">
-	        <form role="form" name="search-item-form" method='POST' action='/'>
-	          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		      <button name="search-item" id="search" type="submit" class="btn btn-primary btn-block" style="background-color: #CE2029; margin-top: 5px; max-width: 200px;">Search Item</button>
-	        </form>
-		  </div>
-		</div>
-	  </div>
-	  <br>
-	  <br>
-	  {% if loading_search %}
-        <form role="form" name="search-form" method='POST' action='/'>
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-	      <div class="form-group">
-            <label for="search-type" style="max-width: 505px;">Search By:</label>
-            <select class="form-control" name="column" id="column-type" style="max-width: 500px;">
-              <option>id</option>
-              <option>description</option>
-              <option>last_sold</option>
-              <option>shelf_life</option>
-			  <option>department</option>
-              <option>price</option>
-	          <option>unit</option>
-	          <option>x_for</option>
-	          <option>cost</option>
-            </select>
+
+      <div class="menu-section">
+        <h4>Menu:</h4>
+
+        <!-- CSV Upload -->
+        <div class="csv-upload">
+          <form role="form" name="add-csv-form" method="POST" action="/" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+              <label for="csv-input">Add .csv File:</label>
+              <input type="file" class="form-control-file" name="csv-input" id="csv" accept=".csv">
+              <input type="submit" name="csv-submit" value="Upload CSV" />
+            </div>
+          </form>
+        </div>
+
+        <!-- Menu Buttons -->
+        <div class="menu-buttons">
+          <div>
+            <form role="form" name="add-item-form" method="POST" action="/">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button name="add-item" id="add" type="submit" class="btn btn-menu">Add Item</button>
+            </form>
           </div>
-		  <div class="form-group">
-		    <input type="text" name="item" class="form-control" id="item-box" placeholder="Enter item description" style="max-width: 500px;" autofocus required>
-		  </div>
-		  <button name="send-search" type="submit" class="btn btn-success btn-default">Search</button>
-        </form>
-        <br>
-	  {% elif loading_add_item %}
-	    <form role="form" name="add-form" method='POST' action='/'>
-	      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-		  <div class="form-group">
-		    <label for="id-add" style="max-width: 505px;">ID:</label>
-		    <input type="text" name="id-add" class="form-control" id="add-id" placeholder="Enter ID" style="max-width: 500px;" autofocus required>
-		  </div>
-		  <div class="form-group">
-		    <label for="description-add" style="max-width: 505px;">Description:</label>
-		    <input type="text" name="description-add" class="form-control" id="add-description" placeholder="Enter description" style="max-width: 500px;" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="last-sold-add" style="max-width: 505px;">Last Sold:</label>
-		    <input type="text" name="last-sold-add" class="form-control" id="add-last-sold" placeholder="Enter last sold date (mm/dd/yyyy)" style="max-width: 500px;" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="shelf-life-add" style="max-width: 505px;">Shelf Life:</label>
-		    <input type="text" name="shelf-life-add" class="form-control" id="add-shelf-life" placeholder="Enter shelf life" style="max-width: 500px;" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="department-add" style="max-width: 505px;">Department:</label>
-		    <input type="text" name="department-add" class="form-control" id="add-department" placeholder="Enter department" style="max-width: 500px;" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="price-add" style="max-width: 505px;">Price:</label>
-		    <input type="text" name="price-add" class="form-control" id="add-price" placeholder="Enter price" style="max-width: 500px;" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="unit-add" style="max-width: 505px;">Unit of Measurement:</label>
-		    <input type="text" name="unit-add" class="form-control" id="add-unit" placeholder="Enter unit of measurement" style="max-width: 500px;" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="xfor-add" style="max-width: 505px;">xFor:</label>
-		    <input type="text" name="xfor-add" class="form-control" id="add-xfor" placeholder="Enter xFor" style="max-width: 500px;" required>
-		  </div>
-		  <div class="form-group">
-		    <label for="cost-add" style="max-width: 505px;">Cost:</label>
-		    <input type="text" name="cost-add" class="form-control" id="add-cost" placeholder="Enter cost" style="max-width: 500px;" required>
-		  </div>
-		  <button name="send-add" type="submit" class="btn btn-success btn-default">Add</button>
-        </form>
-        <br>
-	  {% elif loading_add_csv %}
-		<br>
-	  {% endif %}
-      {% for error in errors %}
-        <h4>{{ error }}</h4>
-      {% endfor %}
-      <br>
-	  {% if item_added %}
-	    {% for item in items %}
-		  <h4>Item with ID: {{ item.id }} successfully added!"</h4>
-		{% endfor %}
-	  {% elif item_searched %}
-	    <h4>Found {{ item_length }} items:</h4>
-		{% for item in items %}
-			<h5>ID: {{ item['id'] }} | Description: {{ item['description'] }} | Last Sold: {{ item['last_sold'] }} | Shelf Life: {{ item['shelf_life'] }} | Department: {{ item['department'] }} | Price: {{ item['price'] }} | Unit of Measurement: {{ item['unit'] }} | xFor: {{ item['x_for'] }} | Cost: {{ item['cost'] }}</h5>
-			<br>
-        {% endfor %}
-	  {% else %}
-		{% for item in items %}
-			<h4>{{ item }}<h4>
-		{% endfor %}
+          <div>
+            <form role="form" name="search-item-form" method="POST" action="/">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button name="search-item" id="search" type="submit" class="btn btn-menu">Search Item</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!-- Forms Section -->
+      <div class="form-section">
+        {% if loading_search %}
+          <form role="form" name="search-form" method="POST" action="/">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+              <label for="column-type">Search By:</label>
+              <select class="form-control" name="column" id="column-type">
+                <option>id</option>
+                <option>description</option>
+                <option>last_sold</option>
+                <option>shelf_life</option>
+                <option>department</option>
+                <option>price</option>
+                <option>unit</option>
+                <option>x_for</option>
+                <option>cost</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="item-box">Search Term:</label>
+              <input type="text" name="item" class="form-control" id="item-box" placeholder="Enter item description" autofocus required>
+            </div>
+            <button name="send-search" type="submit" class="btn btn-success">Search</button>
+          </form>
+        {% elif loading_add_item %}
+          <form role="form" name="add-form" method="POST" action="/">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="form-group">
+              <label for="add-id">ID:</label>
+              <input type="text" name="id-add" class="form-control" id="add-id" placeholder="Enter ID" autofocus required>
+            </div>
+            <div class="form-group">
+              <label for="add-description">Description:</label>
+              <input type="text" name="description-add" class="form-control" id="add-description" placeholder="Enter description" required>
+            </div>
+            <div class="form-group">
+              <label for="add-last-sold">Last Sold:</label>
+              <input type="text" name="last-sold-add" class="form-control" id="add-last-sold" placeholder="Enter last sold date (mm/dd/yyyy)" required>
+            </div>
+            <div class="form-group">
+              <label for="add-shelf-life">Shelf Life:</label>
+              <input type="text" name="shelf-life-add" class="form-control" id="add-shelf-life" placeholder="Enter shelf life" required>
+            </div>
+            <div class="form-group">
+              <label for="add-department">Department:</label>
+              <input type="text" name="department-add" class="form-control" id="add-department" placeholder="Enter department" required>
+            </div>
+            <div class="form-group">
+              <label for="add-price">Price:</label>
+              <input type="text" name="price-add" class="form-control" id="add-price" placeholder="Enter price" required>
+            </div>
+            <div class="form-group">
+              <label for="add-unit">Unit of Measurement:</label>
+              <input type="text" name="unit-add" class="form-control" id="add-unit" placeholder="Enter unit of measurement" required>
+            </div>
+            <div class="form-group">
+              <label for="add-xfor">xFor:</label>
+              <input type="text" name="xfor-add" class="form-control" id="add-xfor" placeholder="Enter xFor" required>
+            </div>
+            <div class="form-group">
+              <label for="add-cost">Cost:</label>
+              <input type="text" name="cost-add" class="form-control" id="add-cost" placeholder="Enter cost" required>
+            </div>
+            <button name="send-add" type="submit" class="btn btn-success">Add</button>
+          </form>
+        {% endif %}
+      </div>
+      <!-- Error Messages -->
+      {% if errors %}
+        <div class="results-section">
+          {% for error in errors %}
+            <div class="error-message">{{ error }}</div>
+          {% endfor %}
+        </div>
       {% endif %}
+
+      <!-- Results Section -->
+      <div class="results-section">
+        {% if item_added %}
+          {% for item in items %}
+            <div class="success-message">Item with ID: {{ item.id }} successfully added!</div>
+          {% endfor %}
+        {% elif item_searched %}
+          <h4>Search Results:</h4>
+          {% for item in items %}
+            <div class="item-card">
+              <div class="item-detail"><strong>ID:</strong> {{ item['id'] }}</div>
+              <div class="item-detail"><strong>Description:</strong> {{ item['description'] }}</div>
+              <div class="item-detail"><strong>Last Sold:</strong> {{ item['last_sold'] }}</div>
+              <div class="item-detail"><strong>Shelf Life:</strong> {{ item['shelf_life'] }}</div>
+              <div class="item-detail"><strong>Department:</strong> {{ item['department'] }}</div>
+              <div class="item-detail"><strong>Price:</strong> {{ item['price'] }}</div>
+              <div class="item-detail"><strong>Unit:</strong> {{ item['unit'] }}</div>
+              <div class="item-detail"><strong>xFor:</strong> {{ item['x_for'] }}</div>
+              <div class="item-detail"><strong>Cost:</strong> {{ item['cost'] }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          {% for item in items %}
+            <div class="item-card">{{ item }}</div>
+          {% endfor %}
+        {% endif %}
+      </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="page-footer">
+      <p>Created by: Alex Thola | Contact: <a href="mailto:alexthola@gmail.com">alexthola@gmail.com</a></p>
+    </footer>
+
     <script src="//code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </body>
-  <br>
-  <br>
-  <footer class="page-footer" style="position: fixed; text-align: center;">
-    <div class="container text-center">
-	  <p>Created by: Alex Thola | Contact information: <a href="mailto:alexthola@gmail.com">alexthola@gmail.com</a></p>
-	</div>
-  </footer>
 </html>
