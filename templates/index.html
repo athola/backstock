@@ -34,15 +34,11 @@
       }
 
       .menu-buttons {
-        display: flex;
-        flex-wrap: wrap;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 15px;
-        margin-bottom: 20px;
-      }
-
-      .menu-buttons > div {
-        flex: 1;
-        min-width: 200px;
+        margin-top: 20px;
+        clear: both;
       }
 
       .btn-menu {
@@ -53,6 +49,7 @@
         min-height: 44px; /* Better touch target */
         font-size: 16px;
         padding: 10px 15px;
+        display: block;
       }
 
       .btn-menu:hover,
@@ -67,7 +64,9 @@
         background-color: #f8f9fa;
         padding: 15px;
         border-radius: 4px;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+        width: 100%;
+        clear: both;
       }
 
       .csv-upload label {
@@ -195,12 +194,12 @@
         }
 
         .menu-buttons {
-          flex-direction: column;
+          grid-template-columns: 1fr;
+          gap: 12px;
         }
 
-        .menu-buttons > div {
-          width: 100%;
-          min-width: 100%;
+        .csv-upload {
+          margin-bottom: 20px;
         }
 
         .container {
@@ -220,8 +219,8 @@
 
       /* Tablet Optimizations */
       @media (min-width: 769px) and (max-width: 1024px) {
-        .menu-buttons > div {
-          min-width: calc(50% - 10px);
+        .menu-buttons {
+          grid-template-columns: repeat(2, 1fr);
         }
       }
     </style>
@@ -247,18 +246,14 @@
 
         <!-- Menu Buttons -->
         <div class="menu-buttons">
-          <div>
-            <form role="form" name="add-item-form" method="POST" action="/">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-              <button name="add-item" id="add" type="submit" class="btn btn-menu">Add Item</button>
-            </form>
-          </div>
-          <div>
-            <form role="form" name="search-item-form" method="POST" action="/">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-              <button name="search-item" id="search" type="submit" class="btn btn-menu">Search Item</button>
-            </form>
-          </div>
+          <form role="form" name="add-item-form" method="POST" action="/">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button name="add-item" id="add" type="submit" class="btn btn-menu">Add Item</button>
+          </form>
+          <form role="form" name="search-item-form" method="POST" action="/">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button name="search-item" id="search" type="submit" class="btn btn-menu">Search Item</button>
+          </form>
         </div>
       </div>
       <!-- Forms Section -->
