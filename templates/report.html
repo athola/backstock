@@ -366,6 +366,7 @@
 
         <!-- Charts Grid -->
         <div class="chart-grid">
+          {% if 'stock_health' in selected_viz %}
           <!-- Stock Level Health -->
           <div class="chart-container">
             <h3 class="chart-title">Stock Level Health</h3>
@@ -373,7 +374,9 @@
               <canvas id="stockLevelChart"></canvas>
             </div>
           </div>
+          {% endif %}
 
+          {% if 'department' in selected_viz %}
           <!-- Department Distribution -->
           <div class="chart-container">
             <h3 class="chart-title">Items by Department</h3>
@@ -381,7 +384,9 @@
               <canvas id="deptChart"></canvas>
             </div>
           </div>
+          {% endif %}
 
+          {% if 'age' in selected_viz %}
           <!-- Inventory Age Distribution -->
           <div class="chart-container">
             <h3 class="chart-title">Inventory Age Distribution</h3>
@@ -389,7 +394,9 @@
               <canvas id="ageChart"></canvas>
             </div>
           </div>
+          {% endif %}
 
+          {% if 'price_range' in selected_viz %}
           <!-- Price Range Distribution -->
           <div class="chart-container">
             <h3 class="chart-title">Price Range Distribution</h3>
@@ -397,7 +404,9 @@
               <canvas id="priceRangeChart"></canvas>
             </div>
           </div>
+          {% endif %}
 
+          {% if 'shelf_life' in selected_viz %}
           <!-- Shelf Life Distribution -->
           <div class="chart-container">
             <h3 class="chart-title">Shelf Life Distribution</h3>
@@ -405,8 +414,9 @@
               <canvas id="shelfLifeChart"></canvas>
             </div>
           </div>
+          {% endif %}
 
-          {% if top_value_items|length > 0 %}
+          {% if 'top_value' in selected_viz and top_value_items|length > 0 %}
           <!-- Top Items by Total Value -->
           <div class="chart-container full-width">
             <h3 class="chart-title">Top 10 Items by Total Inventory Value (Price × Quantity)</h3>
@@ -416,7 +426,7 @@
           </div>
           {% endif %}
 
-          {% if top_items|length > 0 %}
+          {% if 'top_price' in selected_viz and top_items|length > 0 %}
           <!-- Top Items by Price -->
           <div class="chart-container full-width">
             <h3 class="chart-title">Top 10 Most Expensive Items (Unit Price)</h3>
@@ -426,7 +436,7 @@
           </div>
           {% endif %}
 
-          {% if reorder_items|length > 0 %}
+          {% if 'reorder_table' in selected_viz and reorder_items|length > 0 %}
           <!-- Reorder Alert Table -->
           <div class="chart-container full-width">
             <h3 class="chart-title">⚠️ Items Needing Reorder</h3>
@@ -514,6 +524,7 @@
       Chart.defaults.maintainAspectRatio = false;
 
       {% if total_items > 0 %}
+      {% if 'stock_health' in selected_viz %}
       // Stock Level Health Chart (Doughnut)
       const stockLevelCtx = document.getElementById('stockLevelChart').getContext('2d');
       const stockLevelData = {{ stock_levels|tojson }};
@@ -553,7 +564,9 @@
           }
         }
       });
+      {% endif %}
 
+      {% if 'department' in selected_viz %}
       // Department Distribution Chart (Doughnut)
       const deptCtx = document.getElementById('deptChart').getContext('2d');
       const deptData = {{ dept_counts|tojson }};
@@ -593,7 +606,9 @@
           }
         }
       });
+      {% endif %}
 
+      {% if 'age' in selected_viz %}
       // Inventory Age Distribution Chart (Bar)
       const ageCtx = document.getElementById('ageChart').getContext('2d');
       const ageData = {{ age_distribution|tojson }};
@@ -638,7 +653,9 @@
           }
         }
       });
+      {% endif %}
 
+      {% if 'price_range' in selected_viz %}
       // Price Range Distribution Chart (Bar)
       const priceRangeCtx = document.getElementById('priceRangeChart').getContext('2d');
       const priceRangeData = {{ price_ranges|tojson }};
@@ -679,7 +696,9 @@
           }
         }
       });
+      {% endif %}
 
+      {% if 'shelf_life' in selected_viz %}
       // Shelf Life Distribution Chart (Pie)
       const shelfLifeCtx = document.getElementById('shelfLifeChart').getContext('2d');
       const shelfLifeData = {{ shelf_life_counts|tojson }};
@@ -719,8 +738,9 @@
           }
         }
       });
+      {% endif %}
 
-      {% if top_value_items|length > 0 %}
+      {% if 'top_value' in selected_viz and top_value_items|length > 0 %}
       // Top Items by Value Chart (Horizontal Bar)
       const topValueCtx = document.getElementById('topValueChart').getContext('2d');
       const topValueData = {{ top_value_items|tojson }};
@@ -779,7 +799,7 @@
       });
       {% endif %}
 
-      {% if top_items|length > 0 %}
+      {% if 'top_price' in selected_viz and top_items|length > 0 %}
       // Top Items by Price Chart (Horizontal Bar)
       const topItemsCtx = document.getElementById('topItemsChart').getContext('2d');
       const topItemsData = {{ top_items|tojson }};

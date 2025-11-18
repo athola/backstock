@@ -246,6 +246,21 @@ def report() -> str:
     """
     from datetime import datetime, timedelta
 
+    # Get selected visualizations from query parameters
+    selected_viz = request.args.getlist("viz")
+    # If no visualizations selected, show all by default
+    if not selected_viz:
+        selected_viz = [
+            "stock_health",
+            "department",
+            "age",
+            "price_range",
+            "shelf_life",
+            "top_value",
+            "top_price",
+            "reorder_table",
+        ]
+
     # Query all items from database
     all_items = Grocery.query.all()
 
@@ -384,6 +399,7 @@ def report() -> str:
         reorder_items=reorder_items,
         top_value_items=top_value_items,
         age_distribution=age_distribution,
+        selected_viz=selected_viz,
     )
 
 
