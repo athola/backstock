@@ -7,10 +7,12 @@ from pathlib import Path
 
 import connexion
 from flask import request as flask_request
-from flask_sqlalchemy import SQLAlchemy
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+# Import shared database instance
+from src.pybackstock.database import db
 
 # Get the root directory (project root, not src/pybackstock)
 _root_dir = Path(__file__).parent.parent.parent
@@ -73,8 +75,8 @@ talisman = Talisman(
     },
 )
 
-# Initialize SQLAlchemy with the Flask app
-db = SQLAlchemy(flask_app)
+# Initialize the shared database with this Flask app
+db.init_app(flask_app)
 
 # Update the app module to use our Flask app instance
 import src.pybackstock.app as app_module  # noqa: E402

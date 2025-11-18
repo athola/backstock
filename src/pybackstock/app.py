@@ -12,11 +12,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+# Import shared database instance
+from src.pybackstock.database import db
 
 # Constants for analytics calculations
 PRICE_RANGE_BOUNDARIES = (5, 10, 20, 50)
@@ -63,9 +65,7 @@ talisman = Talisman(
     },
 )
 
-db = SQLAlchemy(app)
-
-# Import models after db is created to avoid circular import
+# Import models (db is now initialized in connexion_app.py)
 from src.pybackstock.models import Grocery  # noqa: E402
 
 

@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from datetime import date, datetime, timezone
 from typing import Any
 
-from src.pybackstock.app import db
+from src.pybackstock.database import db
 
 
 class Grocery(db.Model):  # type: ignore[name-defined]
