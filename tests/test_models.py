@@ -1,5 +1,7 @@
 """Unit tests for database models."""
 
+from datetime import datetime, timezone
+
 import pytest
 from flask import Flask
 
@@ -122,8 +124,6 @@ def test_grocery_model_default_reorder_point(app: Flask) -> None:
 @pytest.mark.unit
 def test_grocery_model_default_date_added(app: Flask) -> None:
     """Test that date_added defaults to today when not provided."""
-    from datetime import date
-
     with app.app_context():
         grocery = Grocery(
             item_id=5,
@@ -136,7 +136,7 @@ def test_grocery_model_default_date_added(app: Flask) -> None:
             x_for=1,
             cost="0.99",
         )
-        assert grocery.date_added == date.today()
+        assert grocery.date_added == datetime.now(tz=timezone.utc).date()  # noqa: UP017
 
 
 @pytest.mark.unit

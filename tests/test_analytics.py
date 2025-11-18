@@ -1,6 +1,7 @@
 """Integration tests for analytics and business logic scenarios."""
 
-from datetime import date, timedelta
+import io
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from flask import Flask
@@ -107,7 +108,7 @@ def test_inventory_age_distribution(client: FlaskClient, app: Flask) -> None:
     BDD Scenario: As a store manager, I want to see the age distribution
     of my inventory to identify stale stock.
     """
-    today = date.today()
+    today = datetime.now(tz=timezone.utc).date()  # noqa: UP017
 
     with app.app_context():
         # Given: Items added at different times
@@ -241,8 +242,6 @@ def test_user_workflow_csv_import_then_report(client: FlaskClient) -> None:
     BDD Scenario: As a user, I want to bulk import items via CSV
     and see them in the analytics report.
     """
-    import io
-
     # Given: I have a CSV file with inventory data
     csv_data = (
         b"id,description,last_sold,shelf_life,department,price,unit,x_for,cost,quantity,reorder_point,date_added\n"

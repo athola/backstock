@@ -7,6 +7,7 @@ import io
 import json
 import os
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -16,6 +17,14 @@ from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+# Constants for analytics calculations
+PRICE_RANGE_BOUNDARIES = (5, 10, 20, 50)
+AGE_RANGE_BOUNDARIES = (30, 60, 90)
+CSV_OLD_FORMAT_COLUMNS = 9
+CSV_QUANTITY_COLUMN = 9
+CSV_REORDER_COLUMN = 10
+CSV_DATE_COLUMN = 11
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Query
@@ -238,14 +247,12 @@ def index() -> str:
 
 
 @app.route("/report", methods=["GET"])
-def report() -> str:
+def report() -> str:  # noqa: C901, PLR0912, PLR0915
     """Generate and display inventory analytics report.
 
     Returns:
         Rendered HTML template with report data.
     """
-    from datetime import datetime, timedelta
-
     # Get selected visualizations from query parameters
     selected_viz = request.args.getlist("viz")
     # If no visualizations selected, show all by default
@@ -289,8 +296,8 @@ def report() -> str:
             pass
 
     # Calculate inventory value and profit margin (considering quantity)
-    total_inventory_value = sum(p * q for p, q in zip(prices, quantities))
-    total_inventory_cost = sum(c * q for c, q in zip(costs, quantities))
+    total_inventory_value = sum(p * q for p, q in zip(prices, quantities, strict=True))
+    total_inventory_cost = sum(c * q for c, q in zip(costs, quantities, strict=True))
     total_profit_margin = (
         ((total_inventory_value - total_inventory_cost) / total_inventory_cost * 100)
         if total_inventory_cost > 0
@@ -324,13 +331,13 @@ def report() -> str:
     # Price range distribution
     price_ranges = {"$0-$5": 0, "$5-$10": 0, "$10-$20": 0, "$20-$50": 0, "$50+": 0}
     for price in prices:
-        if price < 5:
+        if price < PRICE_RANGE_BOUNDARIES[0]:
             price_ranges["$0-$5"] += 1
-        elif price < 10:
+        elif price < PRICE_RANGE_BOUNDARIES[1]:
             price_ranges["$5-$10"] += 1
-        elif price < 20:
+        elif price < PRICE_RANGE_BOUNDARIES[2]:
             price_ranges["$10-$20"] += 1
-        elif price < 50:
+        elif price < PRICE_RANGE_BOUNDARIES[3]:
             price_ranges["$20-$50"] += 1
         else:
             price_ranges["$50+"] += 1
@@ -363,20 +370,20 @@ def report() -> str:
         shelf_life_counts[shelf] = shelf_life_counts.get(shelf, 0) + 1
 
     # Recent activity - items sold in last 30 days
-    recent_threshold = datetime.now().date() - timedelta(days=30)
+    recent_threshold = datetime.now(tz=timezone.utc).date() - timedelta(days=30)  # noqa: UP017
     recent_sales = sum(1 for item in all_items if item.last_sold and item.last_sold >= recent_threshold)
 
     # Inventory age analysis
-    today = datetime.now().date()
+    today = datetime.now(tz=timezone.utc).date()  # noqa: UP017
     age_distribution = {"0-30 days": 0, "31-60 days": 0, "61-90 days": 0, "90+ days": 0}
     for item in all_items:
         if item.date_added:
             age_days = (today - item.date_added).days
-            if age_days <= 30:
+            if age_days <= AGE_RANGE_BOUNDARIES[0]:
                 age_distribution["0-30 days"] += 1
-            elif age_days <= 60:
+            elif age_days <= AGE_RANGE_BOUNDARIES[1]:
                 age_distribution["31-60 days"] += 1
-            elif age_days <= 90:
+            elif age_days <= AGE_RANGE_BOUNDARIES[2]:
                 age_distribution["61-90 days"] += 1
             else:
                 age_distribution["90+ days"] += 1
@@ -541,9 +548,9 @@ def iterate_through_csv(csv_input: Any, errors: list[str], items: list[Any]) -> 
     for idx, row in enumerate(csv_input):
         if idx != 0:  # Skip header row
             # Support both old format (9 columns) and new format (12 columns)
-            quantity = int(row[9]) if len(row) > 9 else 0
-            reorder_point = int(row[10]) if len(row) > 10 else 10
-            date_added = row[11] if len(row) > 11 else None
+            quantity = int(row[CSV_QUANTITY_COLUMN]) if len(row) > CSV_OLD_FORMAT_COLUMNS else 0
+            reorder_point = int(row[CSV_REORDER_COLUMN]) if len(row) > CSV_REORDER_COLUMN else 10
+            date_added = row[CSV_DATE_COLUMN] if len(row) > CSV_DATE_COLUMN else None
 
             csv_item_to_add = Grocery(
                 item_id=int(row[0]),

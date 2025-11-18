@@ -1,7 +1,7 @@
 """Database models for the pybackstock application."""
 
 from collections.abc import Iterator
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 
 from src.pybackstock.app import db
@@ -76,12 +76,12 @@ class Grocery(db.Model):  # type: ignore[name-defined]
         self.reorder_point = int(reorder_point)
         # Handle date_added
         if date_added is None:
-            self.date_added = date.today()
+            self.date_added = datetime.now(tz=timezone.utc).date()  # noqa: UP017
         elif isinstance(date_added, str):
             try:
                 self.date_added = datetime.strptime(date_added, "%Y-%m-%d").date()
             except (ValueError, AttributeError):
-                self.date_added = date.today()
+                self.date_added = datetime.now(tz=timezone.utc).date()  # noqa: UP017
         else:
             self.date_added = date_added
 
