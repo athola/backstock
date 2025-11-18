@@ -32,8 +32,26 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Query
     from werkzeug.datastructures import FileStorage
 
-# Get the root directory (project root, not src/pybackstock)
-_root_dir = Path(__file__).parent.parent.parent
+
+def _find_project_root() -> Path:
+    """Find project root by looking for pyproject.toml.
+
+    Returns:
+        Path to the project root directory.
+
+    Raises:
+        RuntimeError: If pyproject.toml cannot be found.
+    """
+    current = Path(__file__).resolve()
+    for parent in [current, *current.parents]:
+        if (parent / "pyproject.toml").exists():
+            return parent
+    msg = "Could not find project root (no pyproject.toml found)"
+    raise RuntimeError(msg)
+
+
+# Get the root directory (project root containing pyproject.toml)
+_root_dir = _find_project_root()
 app = Flask(__name__, template_folder=str(_root_dir / "templates"))
 app.config.from_object(os.environ.get("APP_SETTINGS", "src.pybackstock.config.DevelopmentConfig"))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
