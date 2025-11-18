@@ -254,6 +254,9 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             <button name="search-item" id="search" type="submit" class="btn btn-menu">Search Item</button>
           </form>
+          <form role="form" name="generate-report-form" method="GET" action="/report">
+            <button type="submit" class="btn btn-menu">Generate Report</button>
+          </form>
         </div>
       </div>
       <!-- Forms Section -->

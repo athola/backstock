@@ -227,3 +227,26 @@ def test_health_endpoint_no_database_dependency(client: FlaskClient) -> None:
 
     # Verify it returns immediately without waiting for DB
     # (already tested in test_health_endpoint_fast_response)
+
+
+@pytest.mark.integration
+def test_report_page_get(client: FlaskClient) -> None:
+    """Test GET request to report page."""
+    response = client.get("/report")
+    assert response.status_code == 200
+
+
+@pytest.mark.integration
+def test_report_page_with_data(client: FlaskClient, sample_grocery: None) -> None:
+    """Test report page displays data correctly."""
+    response = client.get("/report")
+    assert response.status_code == 200
+    assert b"Inventory Analytics Report" in response.data
+
+
+@pytest.mark.integration
+def test_report_page_empty_inventory(client: FlaskClient) -> None:
+    """Test report page with empty inventory."""
+    response = client.get("/report")
+    assert response.status_code == 200
+    assert b"No Inventory Data Available" in response.data

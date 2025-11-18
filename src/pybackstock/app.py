@@ -49,7 +49,7 @@ talisman = Talisman(
     strict_transport_security=is_production,
     content_security_policy={
         "default-src": "'self'",
-        "script-src": ["'self'", "'unsafe-inline'", "code.jquery.com", "netdna.bootstrapcdn.com"],
+        "script-src": ["'self'", "'unsafe-inline'", "code.jquery.com", "netdna.bootstrapcdn.com", "cdn.jsdelivr.net"],
         "style-src": ["'self'", "'unsafe-inline'", "netdna.bootstrapcdn.com"],
     },
 )
@@ -234,6 +234,92 @@ def index() -> str:
 
     return render_index_template(
         errors, items, col, load_search, load_add_item, load_add_csv, item_searched, item_added
+    )
+
+
+@app.route("/report", methods=["GET"])
+def report() -> str:
+    """Generate and display inventory analytics report.
+
+    Returns:
+        Rendered HTML template with report data.
+    """
+    # Query all items from database
+    all_items = Grocery.query.all()
+
+    # Calculate analytics
+    total_items = len(all_items)
+
+    # Department distribution
+    dept_counts: dict[str, int] = {}
+    for item in all_items:
+        dept = item.department if item.department else "Uncategorized"
+        dept_counts[dept] = dept_counts.get(dept, 0) + 1
+
+    # Price analysis - convert prices to float for analysis
+    prices: list[float] = []
+    costs: list[float] = []
+    for item in all_items:
+        try:
+            # Remove currency symbols and convert to float
+            price_val = float(item.price.replace("$", "").replace(",", ""))
+            cost_val = float(item.cost.replace("$", "").replace(",", ""))
+            prices.append(price_val)
+            costs.append(cost_val)
+        except (ValueError, AttributeError):
+            pass
+
+    # Calculate inventory value and profit margin
+    total_value = sum(prices)
+    total_cost = sum(costs)
+    total_profit_margin = ((total_value - total_cost) / total_cost * 100) if total_cost > 0 else 0
+
+    # Price range distribution
+    price_ranges = {"$0-$5": 0, "$5-$10": 0, "$10-$20": 0, "$20-$50": 0, "$50+": 0}
+    for price in prices:
+        if price < 5:
+            price_ranges["$0-$5"] += 1
+        elif price < 10:
+            price_ranges["$5-$10"] += 1
+        elif price < 20:
+            price_ranges["$10-$20"] += 1
+        elif price < 50:
+            price_ranges["$20-$50"] += 1
+        else:
+            price_ranges["$50+"] += 1
+
+    # Top 10 most expensive items
+    items_with_prices = [
+        {"description": item.description, "price": float(item.price.replace("$", "").replace(",", ""))}
+        for item in all_items
+        if item.price
+    ]
+    items_with_prices.sort(key=lambda x: x["price"], reverse=True)
+    top_items = items_with_prices[:10]
+
+    # Shelf life distribution
+    shelf_life_counts: dict[str, int] = {}
+    for item in all_items:
+        shelf = item.shelf_life if item.shelf_life else "Unknown"
+        shelf_life_counts[shelf] = shelf_life_counts.get(shelf, 0) + 1
+
+    # Recent activity - items sold in last 30 days
+    from datetime import datetime, timedelta
+
+    recent_threshold = datetime.now().date() - timedelta(days=30)
+    recent_sales = sum(1 for item in all_items if item.last_sold and item.last_sold >= recent_threshold)
+
+    return render_template(
+        "report.html",
+        total_items=total_items,
+        dept_counts=dept_counts,
+        price_ranges=price_ranges,
+        top_items=top_items,
+        shelf_life_counts=shelf_life_counts,
+        total_value=total_value,
+        total_cost=total_cost,
+        total_profit_margin=total_profit_margin,
+        recent_sales=recent_sales,
     )
 
 
