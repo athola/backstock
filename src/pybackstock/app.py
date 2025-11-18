@@ -299,9 +299,7 @@ def report() -> str:  # noqa: C901, PLR0912, PLR0915
     total_inventory_value = sum(p * q for p, q in zip(prices, quantities, strict=True))
     total_inventory_cost = sum(c * q for c, q in zip(costs, quantities, strict=True))
     total_profit_margin = (
-        ((total_inventory_value - total_inventory_cost) / total_inventory_cost * 100)
-        if total_inventory_cost > 0
-        else 0
+        ((total_inventory_value - total_inventory_cost) / total_inventory_cost * 100) if total_inventory_cost > 0 else 0
     )
     total_quantity = sum(quantities)
 
