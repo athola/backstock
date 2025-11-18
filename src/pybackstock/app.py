@@ -12,11 +12,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import func
 from werkzeug.middleware.proxy_fix import ProxyFix
+
+# Import shared database instance
+from src.pybackstock.database import db
 
 # Constants for analytics calculations
 PRICE_RANGE_BOUNDARIES = (5, 10, 20, 50)
@@ -30,8 +32,26 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Query
     from werkzeug.datastructures import FileStorage
 
-# Get the root directory (project root, not src/pybackstock)
-_root_dir = Path(__file__).parent.parent.parent
+
+def _find_project_root() -> Path:
+    """Find project root by looking for pyproject.toml.
+
+    Returns:
+        Path to the project root directory.
+
+    Raises:
+        RuntimeError: If pyproject.toml cannot be found.
+    """
+    current = Path(__file__).resolve()
+    for parent in [current, *current.parents]:
+        if (parent / "pyproject.toml").exists():
+            return parent
+    msg = "Could not find project root (no pyproject.toml found)"
+    raise RuntimeError(msg)
+
+
+# Get the root directory (project root containing pyproject.toml)
+_root_dir = _find_project_root()
 app = Flask(__name__, template_folder=str(_root_dir / "templates"))
 app.config.from_object(os.environ.get("APP_SETTINGS", "src.pybackstock.config.DevelopmentConfig"))
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -63,9 +83,10 @@ talisman = Talisman(
     },
 )
 
-db = SQLAlchemy(app)
+# Initialize the shared database with this Flask app
+db.init_app(app)
 
-# Import models after db is created to avoid circular import
+# Import models after db is initialized
 from src.pybackstock.models import Grocery  # noqa: E402
 
 
@@ -181,24 +202,19 @@ def handle_csv_action() -> tuple[list[str], list[Any]]:
             iterate_through_csv(csv_input, errors, items)
         else:
             errors.append("Invalid file type. Needs to be .csv")
-    except (KeyError, ValueError, TypeError, UnicodeDecodeError) as ex:
+    except (KeyError, ValueError, TypeError, UnicodeDecodeError, IndexError) as ex:
         error_type = "Unable to process CSV file. Please check the file format. "
         errors = report_exception(ex, error_type, errors)
     return errors, items
 
 
-@app.route("/health", methods=["GET"])
-@csrf.exempt
-@talisman(force_https=False)
-def health_check() -> tuple[dict[str, str], int]:
-    """Health check endpoint for monitoring and deployment platforms.
+# Route handlers have been moved to src.pybackstock.api.handlers
+# The routes are now managed by Connexion via openapi.yaml
 
-    This endpoint is used by Render.com and other platforms to verify
-    the service is running and responsive. It must:
-    - Return 200 status code
-    - Be exempt from CSRF protection (monitoring systems don't send tokens)
-    - Be exempt from HTTPS forcing (health checks may come over HTTP internally)
-    - Respond quickly without database dependencies
+
+@app.route("/health")
+def health() -> tuple[dict[str, str], int]:
+    """Health check endpoint for monitoring and deployment platforms.
 
     Returns:
         JSON response with status and HTTP 200 code.
@@ -485,7 +501,37 @@ def calculate_reorder_data(items: list[Grocery]) -> dict[str, Any]:
     return {"reorder_items": reorder_items}
 
 
-@app.route("/report", methods=["GET"])
+def _calculate_viz_data(selected_viz: list[str], all_items: list[Any]) -> dict[str, Any]:
+    """Calculate data for selected visualizations.
+
+    Args:
+        selected_viz: List of visualization names to calculate.
+        all_items: List of all grocery items from database.
+
+    Returns:
+        Dictionary containing calculated visualization data.
+    """
+    # Map visualization names to their calculation functions
+    viz_calculators = {
+        "stock_health": calculate_stock_health_data,
+        "department": calculate_department_data,
+        "age": calculate_age_data,
+        "price_range": calculate_price_range_data,
+        "shelf_life": calculate_shelf_life_data,
+        "top_value": calculate_top_value_data,
+        "top_price": calculate_top_price_data,
+        "reorder_table": calculate_reorder_data,
+    }
+
+    viz_data: dict[str, Any] = {}
+    for viz_name in selected_viz:
+        if viz_name in viz_calculators:
+            viz_data.update(viz_calculators[viz_name](all_items))
+
+    return viz_data
+
+
+@app.route("/report")
 def report() -> str:
     """Generate and display inventory analytics report.
 
@@ -515,33 +561,8 @@ def report() -> str:
     # Always calculate summary metrics (shown in summary cards)
     summary_data = calculate_summary_metrics(all_items)
 
-    # Initialize visualization data dictionary
-    viz_data: dict[str, Any] = {}
-
-    # Only calculate data for selected visualizations
-    if "stock_health" in selected_viz:
-        viz_data.update(calculate_stock_health_data(all_items))
-
-    if "department" in selected_viz:
-        viz_data.update(calculate_department_data(all_items))
-
-    if "age" in selected_viz:
-        viz_data.update(calculate_age_data(all_items))
-
-    if "price_range" in selected_viz:
-        viz_data.update(calculate_price_range_data(all_items))
-
-    if "shelf_life" in selected_viz:
-        viz_data.update(calculate_shelf_life_data(all_items))
-
-    if "top_value" in selected_viz:
-        viz_data.update(calculate_top_value_data(all_items))
-
-    if "top_price" in selected_viz:
-        viz_data.update(calculate_top_price_data(all_items))
-
-    if "reorder_table" in selected_viz:
-        viz_data.update(calculate_reorder_data(all_items))
+    # Calculate data for selected visualizations
+    viz_data = _calculate_viz_data(selected_viz, all_items)
 
     # Merge summary data and visualization data
     template_data = {**summary_data, **viz_data, "selected_viz": selected_viz}
@@ -680,7 +701,7 @@ def add_item(item: Grocery, errors: list[str], items: list[Any]) -> tuple[list[s
             items.append(json_obj)
         else:
             errors.append(f"Unable to add item to database. This item has already been added with ID: {item.id}")
-    except (ValueError, TypeError) as ex:
+    except (ValueError, TypeError, OSError) as ex:
         db.session.rollback()
         errors.append(f"Unable to add item to database. {ex!s}")
     return errors, items
@@ -697,6 +718,10 @@ def iterate_through_csv(csv_input: Any, errors: list[str], items: list[Any]) -> 
     row: list[str]
     for idx, row in enumerate(csv_input):
         if idx != 0:  # Skip header row
+            # Skip empty rows
+            if not row or len(row) < CSV_OLD_FORMAT_COLUMNS:
+                continue
+
             # Support both old format (9 columns) and new format (12 columns)
             quantity = int(row[CSV_QUANTITY_COLUMN]) if len(row) > CSV_OLD_FORMAT_COLUMNS else 0
             reorder_point = int(row[CSV_REORDER_COLUMN]) if len(row) > CSV_REORDER_COLUMN else 10

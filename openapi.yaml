@@ -1,0 +1,231 @@
+openapi: 3.0.3
+info:
+  title: PyBackstock Inventory Management API
+  description: Flask-based inventory management system with analytics and reporting
+  version: 2.0.0
+  contact:
+    name: Alex Thola
+    email: alexthola@gmail.com
+
+servers:
+  - url: /
+    description: Main application server
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Health check for monitoring and deployment platforms
+      operationId: src.pybackstock.api.handlers.health_check
+      tags:
+        - monitoring
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+
+  /:
+    get:
+      summary: Main inventory page
+      description: Display the main inventory management interface
+      operationId: src.pybackstock.api.handlers.index_get
+      tags:
+        - inventory
+      responses:
+        '200':
+          description: HTML page rendered successfully
+          content:
+            text/html:
+              schema:
+                type: string
+
+    post:
+      summary: Handle inventory operations
+      description: Handle search, add item, or CSV upload operations
+      operationId: src.pybackstock.api.handlers.index_post
+      tags:
+        - inventory
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                search-item:
+                  type: string
+                add-item:
+                  type: string
+                add-csv:
+                  type: string
+                send-search:
+                  type: string
+                send-add:
+                  type: string
+                csv-submit:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                csv-input:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Operation completed
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /report:
+    get:
+      summary: Generate analytics report
+      description: Generate and display inventory analytics report with optional visualization filters
+      operationId: src.pybackstock.api.handlers.report_get
+      tags:
+        - analytics
+      parameters:
+        - name: viz
+          in: query
+          description: Selected visualizations to display
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - stock_health
+                - department
+                - age
+                - price_range
+                - shelf_life
+                - top_value
+                - top_price
+                - reorder_table
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Report generated successfully
+          content:
+            text/html:
+              schema:
+                type: string
+        '500':
+          description: Internal server error during report generation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  detail:
+                    type: string
+
+  /api/report/data:
+    get:
+      summary: Get report data as JSON
+      description: Get analytics report data as JSON for debugging
+      operationId: src.pybackstock.api.handlers.report_data_get
+      tags:
+        - analytics
+        - debug
+      parameters:
+        - name: viz
+          in: query
+          description: Selected visualizations to calculate
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - stock_health
+                - department
+                - age
+                - price_range
+                - shelf_life
+                - top_value
+                - top_price
+                - reorder_table
+          style: form
+          explode: true
+      responses:
+        '200':
+          description: Report data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_items:
+                    type: integer
+                  total_value:
+                    type: number
+                  total_cost:
+                    type: number
+                  total_profit_margin:
+                    type: number
+                  total_quantity:
+                    type: integer
+                  recent_sales:
+                    type: integer
+                  low_stock_count:
+                    type: integer
+                  out_of_stock_count:
+                    type: integer
+                  stock_levels:
+                    type: object
+                  dept_counts:
+                    type: object
+                  age_distribution:
+                    type: object
+                  price_ranges:
+                    type: object
+                  shelf_life_counts:
+                    type: object
+                  top_value_items:
+                    type: array
+                    items:
+                      type: object
+                  top_items:
+                    type: array
+                    items:
+                      type: object
+                  reorder_items:
+                    type: array
+                    items:
+                      type: object
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  detail:
+                    type: string
+                  traceback:
+                    type: string
+
+tags:
+  - name: monitoring
+    description: Health check and monitoring endpoints
+  - name: inventory
+    description: Inventory management operations
+  - name: analytics
+    description: Analytics and reporting endpoints
+  - name: debug
+    description: Debugging and development endpoints

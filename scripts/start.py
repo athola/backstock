@@ -99,7 +99,7 @@ os.execvp(
     "gunicorn",
     [
         "gunicorn",
-        "src.pybackstock.app:app",
+        "src.pybackstock.connexion_app:app",  # Use connexion_app which wraps Flask with OpenAPI
         "--pythonpath",
         str(project_root),  # Add project root to Python path for module resolution
         "--bind",
