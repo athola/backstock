@@ -163,7 +163,9 @@ class TestReportEndpointASGI:
         assert "Total Items" in content or "total" in content.lower(), "Report should show total items count"
 
     def test_report_with_selected_visualizations(
-        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
+        self,
+        connexion_client_with_db: Any,
+        sample_inventory_data: None,  # noqa: ARG002
     ) -> None:
         """Test report with specific visualizations selected."""
         response = connexion_client_with_db.get("/report?viz=stock_health&viz=department")
@@ -187,7 +189,9 @@ class TestReportEndpointASGI:
         assert data["total_items"] == 3, f"Expected 3 items, got {data['total_items']}"
 
     def test_report_app_context_properly_pushed(
-        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
+        self,
+        connexion_client_with_db: Any,
+        sample_inventory_data: None,  # noqa: ARG002
     ) -> None:
         """Test that Flask app context is properly available for database queries.
 
@@ -206,7 +210,9 @@ class TestReportEndpointASGI:
         assert response.status_code == 200, "Report should render successfully"
 
     def test_report_handles_database_queries_correctly(
-        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
+        self,
+        connexion_client_with_db: Any,
+        sample_inventory_data: None,  # noqa: ARG002
     ) -> None:
         """Test that report can execute database queries within ASGI context.
 
@@ -242,7 +248,9 @@ class TestReportCalculationsASGI:
     """Tests for report calculation accuracy in ASGI context."""
 
     def test_summary_metrics_calculated_correctly(
-        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
+        self,
+        connexion_client_with_db: Any,
+        sample_inventory_data: None,  # noqa: ARG002
     ) -> None:
         """Test that summary metrics are calculated correctly from database."""
         response = connexion_client_with_db.get("/api/report/data")
