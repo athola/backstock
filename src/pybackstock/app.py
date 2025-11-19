@@ -504,84 +504,8 @@ def calculate_reorder_data(items: list[Grocery]) -> dict[str, Any]:
     return {"reorder_items": reorder_items}
 
 
-def _calculate_viz_data(selected_viz: list[str], all_items: list[Any]) -> dict[str, Any]:
-    """Calculate data for selected visualizations.
-
-    Args:
-        selected_viz: List of visualization names to calculate.
-        all_items: List of all grocery items from database.
-
-    Returns:
-        Dictionary containing calculated visualization data.
-    """
-    # Map visualization names to their calculation functions
-    viz_calculators = {
-        "stock_health": calculate_stock_health_data,
-        "department": calculate_department_data,
-        "age": calculate_age_data,
-        "price_range": calculate_price_range_data,
-        "shelf_life": calculate_shelf_life_data,
-        "top_value": calculate_top_value_data,
-        "top_price": calculate_top_price_data,
-        "reorder_table": calculate_reorder_data,
-    }
-
-    viz_data: dict[str, Any] = {}
-    for viz_name in selected_viz:
-        if viz_name in viz_calculators:
-            viz_data.update(viz_calculators[viz_name](all_items))
-
-    return viz_data
-
-
-@app.route("/report")
-def report() -> str:
-    """Generate and display inventory analytics report.
-
-    Only calculates data for selected visualizations to optimize performance.
-
-    Returns:
-        Rendered HTML template with report data.
-    """
-    # Get selected visualizations from query parameters
-    selected_viz = request.args.getlist("viz")
-    # If no visualizations selected, show all by default
-    if not selected_viz:
-        selected_viz = [
-            "stock_health",
-            "department",
-            "age",
-            "price_range",
-            "shelf_life",
-            "top_value",
-            "top_price",
-            "reorder_table",
-        ]
-
-    # Query all items from database
-    all_items = Grocery.query.all()
-
-    # Always calculate summary metrics (shown in summary cards)
-    summary_data = calculate_summary_metrics(all_items)
-
-    # Calculate data for selected visualizations
-    viz_data = _calculate_viz_data(selected_viz, all_items)
-
-    # Merge summary data and visualization data
-    template_data = {**summary_data, **viz_data, "selected_viz": selected_viz}
-
-    # Provide empty defaults for visualizations that weren't selected
-    # This prevents template errors if a visualization references missing data
-    template_data.setdefault("stock_levels", {})
-    template_data.setdefault("dept_counts", {})
-    template_data.setdefault("age_distribution", {})
-    template_data.setdefault("price_ranges", {})
-    template_data.setdefault("shelf_life_counts", {})
-    template_data.setdefault("top_value_items", [])
-    template_data.setdefault("top_items", [])
-    template_data.setdefault("reorder_items", [])
-
-    return render_template("report.html", **template_data)
+# /report route is handled by Connexion via openapi.yaml -> src.pybackstock.api.handlers.report_get()
+# The handler already includes the required app.app_context() wrapper for ASGI compatibility
 
 
 def report_exception(ex: Exception, error_type: str, errors: list[str]) -> list[str]:

@@ -229,51 +229,14 @@ def test_health_endpoint_no_database_dependency(client: FlaskClient) -> None:
     # (already tested in test_health_endpoint_fast_response)
 
 
-@pytest.mark.integration
-def test_report_page_get(client: FlaskClient) -> None:
-    """Test GET request to report page."""
-    response = client.get("/report")
-    assert response.status_code == 200
+# NOTE: Report route tests have been moved to test_api_handlers.py
+# The /report route is handled by Connexion (see openapi.yaml -> src.pybackstock.api.handlers.report_get)
+# These Flask-client tests are deprecated - use test_api_handlers.py::TestReportGetHandler instead
 
-
-@pytest.mark.integration
-def test_report_page_with_data(client: FlaskClient, sample_grocery: None) -> None:
-    """Test report page displays data correctly."""
-    response = client.get("/report")
-    assert response.status_code == 200
-    assert b"Inventory Analytics Report" in response.data
-
-
-@pytest.mark.integration
-def test_report_page_empty_inventory(client: FlaskClient) -> None:
-    """Test report page with empty inventory."""
-    response = client.get("/report")
-    assert response.status_code == 200
-    assert b"No Inventory Data Available" in response.data
-
-
-@pytest.mark.integration
-def test_report_page_with_selected_visualizations(client: FlaskClient, sample_grocery: None) -> None:
-    """Test report page with specific visualizations selected."""
-    response = client.get("/report?viz=stock_health&viz=department")
-    assert response.status_code == 200
-    assert b"Inventory Analytics Report" in response.data
-
-
-@pytest.mark.integration
-def test_report_page_with_single_visualization(client: FlaskClient, sample_grocery: None) -> None:
-    """Test report page with single visualization selected."""
-    response = client.get("/report?viz=stock_health")
-    assert response.status_code == 200
-    assert b"Inventory Analytics Report" in response.data
-
-
-@pytest.mark.integration
-def test_report_page_with_no_viz_parameter(client: FlaskClient, sample_grocery: None) -> None:
-    """Test report page defaults to all visualizations when no viz parameter provided."""
-    response = client.get("/report")
-    assert response.status_code == 200
-    assert b"Inventory Analytics Report" in response.data
+# @pytest.mark.integration
+# def test_report_page_get(client: FlaskClient) -> None:
+#     """DEPRECATED: Test GET request to report page. Use test_api_handlers.py instead."""
+#     pass
 
 
 @pytest.mark.integration
