@@ -6,11 +6,12 @@ import sys
 import traceback
 from typing import Any
 
-from flask import current_app, render_template, request
+from flask import render_template, request
 
 from src.pybackstock.app import (
     FormAction,
     Grocery,
+    app,
     calculate_age_data,
     calculate_department_data,
     calculate_price_range_data,
@@ -25,8 +26,6 @@ from src.pybackstock.app import (
     handle_search_action,
     render_index_template,
 )
-
-# Avoid circular import by using current_app instead of importing flask_app directly
 
 
 def health_check() -> tuple[dict[str, str], int]:
@@ -149,7 +148,7 @@ def report_get() -> str:
             ]
 
         # Query all items from database - must be within app context for Connexion ASGI
-        with current_app.app_context():
+        with app.app_context():
             all_items = Grocery.query.all()
 
             # Always calculate summary metrics (shown in summary cards)
@@ -206,7 +205,7 @@ def report_data_get() -> tuple[dict[str, Any], int]:
             ]
 
         # Query all items from database - must be within app context for Connexion ASGI
-        with current_app.app_context():
+        with app.app_context():
             all_items = Grocery.query.all()
 
             # Always calculate summary metrics
