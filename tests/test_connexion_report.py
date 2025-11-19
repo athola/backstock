@@ -142,7 +142,8 @@ class TestReportEndpointASGI:
         assert response.status_code == 200, f"Report should handle empty database, got status {response.status_code}"
         assert b"No Inventory Data Available" in response.content
 
-    def test_report_with_sample_data(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_report_with_sample_data(self, connexion_client_with_db: Any) -> None:
         """Test report generation with sample data.
 
         This is the critical test that verifies the app context fix works correctly
@@ -162,18 +163,16 @@ class TestReportEndpointASGI:
         content = response.content.decode("utf-8")
         assert "Total Items" in content or "total" in content.lower(), "Report should show total items count"
 
-    def test_report_with_selected_visualizations(
-        self,
-        connexion_client_with_db: Any,
-        sample_inventory_data: None,  # noqa: ARG002
-    ) -> None:
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_report_with_selected_visualizations(self, connexion_client_with_db: Any) -> None:
         """Test report with specific visualizations selected."""
         response = connexion_client_with_db.get("/report?viz=stock_health&viz=department")
 
         assert response.status_code == 200, f"Report with viz params failed: {response.status_code}"
         assert b"Inventory Analytics Report" in response.content
 
-    def test_report_data_api_endpoint(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_report_data_api_endpoint(self, connexion_client_with_db: Any) -> None:
         """Test /api/report/data JSON endpoint.
 
         This endpoint is useful for debugging and verifies JSON serialization works.
@@ -188,11 +187,8 @@ class TestReportEndpointASGI:
         assert "total_items" in data, "Should include total_items in response"
         assert data["total_items"] == 3, f"Expected 3 items, got {data['total_items']}"
 
-    def test_report_app_context_properly_pushed(
-        self,
-        connexion_client_with_db: Any,
-        sample_inventory_data: None,  # noqa: ARG002
-    ) -> None:
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_report_app_context_properly_pushed(self, connexion_client_with_db: Any) -> None:
         """Test that Flask app context is properly available for database queries.
 
         This test specifically validates the fix for the app context issue where
@@ -209,11 +205,8 @@ class TestReportEndpointASGI:
         # Should successfully return rendered HTML
         assert response.status_code == 200, "Report should render successfully"
 
-    def test_report_handles_database_queries_correctly(
-        self,
-        connexion_client_with_db: Any,
-        sample_inventory_data: None,  # noqa: ARG002
-    ) -> None:
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_report_handles_database_queries_correctly(self, connexion_client_with_db: Any) -> None:
         """Test that report can execute database queries within ASGI context.
 
         This verifies the specific fix where we import the Flask app instance
@@ -229,7 +222,8 @@ class TestReportEndpointASGI:
         assert "total_value" in data, "Should have calculated metrics from DB data"
         assert "total_cost" in data, "Should have calculated cost from DB data"
 
-    def test_report_multiple_requests(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_report_multiple_requests(self, connexion_client_with_db: Any) -> None:
         """Test that report endpoint handles multiple consecutive requests.
 
         Verifies app context is properly managed across multiple requests.
@@ -247,11 +241,8 @@ class TestReportEndpointASGI:
 class TestReportCalculationsASGI:
     """Tests for report calculation accuracy in ASGI context."""
 
-    def test_summary_metrics_calculated_correctly(
-        self,
-        connexion_client_with_db: Any,
-        sample_inventory_data: None,  # noqa: ARG002
-    ) -> None:
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_summary_metrics_calculated_correctly(self, connexion_client_with_db: Any) -> None:
         """Test that summary metrics are calculated correctly from database."""
         response = connexion_client_with_db.get("/api/report/data")
         data = response.json()
@@ -261,7 +252,8 @@ class TestReportCalculationsASGI:
         assert data["out_of_stock_count"] >= 1, "Should detect out of stock items"
         assert data["low_stock_count"] >= 1, "Should detect low stock items"
 
-    def test_visualizations_data_present(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
+    @pytest.mark.usefixtures("sample_inventory_data")
+    def test_visualizations_data_present(self, connexion_client_with_db: Any) -> None:
         """Test that visualization data is generated correctly."""
         response = connexion_client_with_db.get("/api/report/data")
         data = response.json()

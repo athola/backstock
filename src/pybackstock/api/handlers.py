@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import sys
 import traceback
 from typing import Any
@@ -26,6 +27,8 @@ from src.pybackstock.app import (
     handle_search_action,
     render_index_template,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def health_check() -> tuple[dict[str, str], int]:
@@ -177,8 +180,7 @@ def report_get() -> str:
         exc_tb = sys.exc_info()[-1]
         tb_lineno: int | str = exc_tb.tb_lineno if exc_tb is not None else "unknown"
         error_msg = f"Report generation error: {ex!s} at line {tb_lineno}"
-        print(error_msg)  # noqa: T201
-        print(traceback.format_exc())  # noqa: T201
+        logger.exception(error_msg)
         raise
 
 
