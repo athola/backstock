@@ -17,7 +17,6 @@ import pytest
 from src.pybackstock import Grocery, db
 from src.pybackstock.connexion_app import connexion_app
 
-
 # Set test environment BEFORE creating fixtures
 os.environ["APP_SETTINGS"] = "src.pybackstock.config.TestingConfig"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
@@ -140,14 +139,10 @@ class TestReportEndpointASGI:
         This verifies that app context handling works correctly even with no data.
         """
         response = connexion_client_with_db.get("/report")
-        assert response.status_code == 200, (
-            f"Report should handle empty database, got status {response.status_code}"
-        )
+        assert response.status_code == 200, f"Report should handle empty database, got status {response.status_code}"
         assert b"No Inventory Data Available" in response.content
 
-    def test_report_with_sample_data(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
-    ) -> None:
+    def test_report_with_sample_data(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
         """Test report generation with sample data.
 
         This is the critical test that verifies the app context fix works correctly
@@ -157,44 +152,33 @@ class TestReportEndpointASGI:
 
         # Verify successful response
         assert response.status_code == 200, (
-            f"Report generation failed with status {response.status_code}. "
-            f"Response: {response.content[:500]}"
+            f"Report generation failed with status {response.status_code}. Response: {response.content[:500]}"
         )
 
         # Verify report contains expected content
-        assert b"Inventory Analytics Report" in response.content, (
-            "Report should contain title"
-        )
+        assert b"Inventory Analytics Report" in response.content, "Report should contain title"
 
         # Verify some summary metrics are rendered
         content = response.content.decode("utf-8")
-        assert "Total Items" in content or "total" in content.lower(), (
-            "Report should show total items count"
-        )
+        assert "Total Items" in content or "total" in content.lower(), "Report should show total items count"
 
     def test_report_with_selected_visualizations(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
+        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
     ) -> None:
         """Test report with specific visualizations selected."""
         response = connexion_client_with_db.get("/report?viz=stock_health&viz=department")
 
-        assert response.status_code == 200, (
-            f"Report with viz params failed: {response.status_code}"
-        )
+        assert response.status_code == 200, f"Report with viz params failed: {response.status_code}"
         assert b"Inventory Analytics Report" in response.content
 
-    def test_report_data_api_endpoint(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
-    ) -> None:
+    def test_report_data_api_endpoint(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
         """Test /api/report/data JSON endpoint.
 
         This endpoint is useful for debugging and verifies JSON serialization works.
         """
         response = connexion_client_with_db.get("/api/report/data")
 
-        assert response.status_code == 200, (
-            f"Report data API failed with status {response.status_code}"
-        )
+        assert response.status_code == 200, f"Report data API failed with status {response.status_code}"
 
         # Verify JSON response
         data = response.json()
@@ -203,7 +187,7 @@ class TestReportEndpointASGI:
         assert data["total_items"] == 3, f"Expected 3 items, got {data['total_items']}"
 
     def test_report_app_context_properly_pushed(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
+        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
     ) -> None:
         """Test that Flask app context is properly available for database queries.
 
@@ -222,7 +206,7 @@ class TestReportEndpointASGI:
         assert response.status_code == 200, "Report should render successfully"
 
     def test_report_handles_database_queries_correctly(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
+        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
     ) -> None:
         """Test that report can execute database queries within ASGI context.
 
@@ -239,9 +223,7 @@ class TestReportEndpointASGI:
         assert "total_value" in data, "Should have calculated metrics from DB data"
         assert "total_cost" in data, "Should have calculated cost from DB data"
 
-    def test_report_multiple_requests(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
-    ) -> None:
+    def test_report_multiple_requests(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
         """Test that report endpoint handles multiple consecutive requests.
 
         Verifies app context is properly managed across multiple requests.
@@ -252,9 +234,7 @@ class TestReportEndpointASGI:
             responses.append(response.status_code)
 
         # All requests should succeed
-        assert all(status == 200 for status in responses), (
-            f"All report requests should succeed, got: {responses}"
-        )
+        assert all(status == 200 for status in responses), f"All report requests should succeed, got: {responses}"
 
 
 @pytest.mark.integration
@@ -262,7 +242,7 @@ class TestReportCalculationsASGI:
     """Tests for report calculation accuracy in ASGI context."""
 
     def test_summary_metrics_calculated_correctly(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
+        self, connexion_client_with_db: Any, sample_inventory_data: None  # noqa: ARG002
     ) -> None:
         """Test that summary metrics are calculated correctly from database."""
         response = connexion_client_with_db.get("/api/report/data")
@@ -273,14 +253,10 @@ class TestReportCalculationsASGI:
         assert data["out_of_stock_count"] >= 1, "Should detect out of stock items"
         assert data["low_stock_count"] >= 1, "Should detect low stock items"
 
-    def test_visualizations_data_present(
-        self, connexion_client_with_db: Any, sample_inventory_data: None
-    ) -> None:
+    def test_visualizations_data_present(self, connexion_client_with_db: Any, sample_inventory_data: None) -> None:  # noqa: ARG002
         """Test that visualization data is generated correctly."""
         response = connexion_client_with_db.get("/api/report/data")
         data = response.json()
 
         # Check that visualization data keys exist
-        assert "dept_counts" in data or "department" in str(data), (
-            "Should include department visualization data"
-        )
+        assert "dept_counts" in data or "department" in str(data), "Should include department visualization data"
