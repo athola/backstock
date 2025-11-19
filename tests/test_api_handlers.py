@@ -4,11 +4,8 @@ These tests verify the API handler functions in src/pybackstock/api/handlers.py
 which are called by Connexion when routes are invoked.
 """
 
-from typing import Any
-
 import pytest
 from flask import Flask
-from flask.testing import FlaskClient
 
 from src.pybackstock import Grocery, db
 from src.pybackstock.api.handlers import (
@@ -84,11 +81,10 @@ class TestIndexPostHandler:
             assert "Add .csv File:" in result
             assert 'name="csv-input"' in result
 
-    def test_index_post_handles_search_action(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_index_post_handles_search_action(self, app: Flask) -> None:
         """Test that index_post handles search form submission."""
-        with app.test_request_context(
-            "/", method="POST", data={"send-search": "", "column": "id", "item": "1"}
-        ):
+        with app.test_request_context("/", method="POST", data={"send-search": "", "column": "id", "item": "1"}):
             result = index_post()
 
             assert isinstance(result, str)
@@ -123,7 +119,10 @@ class TestIndexPostHandler:
 
     def test_index_post_handles_csv_action(self, app: Flask) -> None:
         """Test that index_post handles CSV upload submission."""
-        csv_content = b"id,description,last_sold,shelf_life,department,price,unit,x_for,cost,quantity,reorder_point\n9998,CSV Test,2024-01-01,7d,Test,1.99,ea,1,0.99,10,5\n"
+        csv_content = (
+            b"id,description,last_sold,shelf_life,department,price,unit,x_for,cost,"
+            b"quantity,reorder_point\n9998,CSV Test,2024-01-01,7d,Test,1.99,ea,1,0.99,10,5\n"
+        )
 
         with app.test_request_context(
             "/",
@@ -144,7 +143,8 @@ class TestIndexPostHandler:
 class TestCalculateVisualizationsFunction:
     """Tests for _calculate_visualizations helper function."""
 
-    def test_calculate_single_visualization(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_calculate_single_visualization(self, app: Flask) -> None:
         """Test calculating a single visualization."""
         with app.app_context():
             all_items = Grocery.query.all()
@@ -153,19 +153,19 @@ class TestCalculateVisualizationsFunction:
             assert "stock_levels" in viz_data
             assert isinstance(viz_data["stock_levels"], dict)
 
-    def test_calculate_multiple_visualizations(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_calculate_multiple_visualizations(self, app: Flask) -> None:
         """Test calculating multiple visualizations."""
         with app.app_context():
             all_items = Grocery.query.all()
-            viz_data = _calculate_visualizations(
-                ["stock_health", "department", "age"], all_items
-            )
+            viz_data = _calculate_visualizations(["stock_health", "department", "age"], all_items)
 
             assert "stock_levels" in viz_data
             assert "dept_counts" in viz_data
             assert "age_distribution" in viz_data
 
-    def test_calculate_all_visualizations(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_calculate_all_visualizations(self, app: Flask) -> None:
         """Test calculating all available visualizations."""
         with app.app_context():
             all_items = Grocery.query.all()
@@ -192,7 +192,8 @@ class TestCalculateVisualizationsFunction:
             assert "top_items" in viz_data
             assert "reorder_items" in viz_data
 
-    def test_calculate_with_empty_viz_list(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_calculate_with_empty_viz_list(self, app: Flask) -> None:
         """Test that empty visualization list returns empty data."""
         with app.app_context():
             all_items = Grocery.query.all()
@@ -200,7 +201,8 @@ class TestCalculateVisualizationsFunction:
 
             assert viz_data == {}
 
-    def test_calculate_with_invalid_viz_name(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_calculate_with_invalid_viz_name(self, app: Flask) -> None:
         """Test that invalid visualization names are safely ignored."""
         with app.app_context():
             all_items = Grocery.query.all()
@@ -214,7 +216,8 @@ class TestCalculateVisualizationsFunction:
 class TestReportGetHandler:
     """Tests for report_get handler function."""
 
-    def test_report_get_with_data(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_report_get_with_data(self, app: Flask) -> None:
         """Test report_get with sample data."""
         with app.test_request_context("/report"):
             result = report_get()
@@ -230,9 +233,8 @@ class TestReportGetHandler:
             assert isinstance(result, str)
             assert "No Inventory Data Available" in result
 
-    def test_report_get_with_selected_visualizations(
-        self, app: Flask, sample_grocery: None
-    ) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_report_get_with_selected_visualizations(self, app: Flask) -> None:
         """Test report_get with specific visualizations selected."""
         with app.test_request_context("/report?viz=stock_health&viz=department"):
             result = report_get()
@@ -240,9 +242,8 @@ class TestReportGetHandler:
             assert isinstance(result, str)
             assert "Inventory Analytics Report" in result
 
-    def test_report_get_defaults_to_all_visualizations(
-        self, app: Flask, sample_grocery: None
-    ) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_report_get_defaults_to_all_visualizations(self, app: Flask) -> None:
         """Test that report_get shows all visualizations by default."""
         with app.test_request_context("/report"):
             result = report_get()
@@ -255,7 +256,8 @@ class TestReportGetHandler:
 class TestReportDataGetHandler:
     """Tests for report_data_get handler function (JSON API endpoint)."""
 
-    def test_report_data_get_returns_json(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_report_data_get_returns_json(self, app: Flask) -> None:
         """Test that report_data_get returns JSON data."""
         with app.test_request_context("/api/report/data"):
             response, status_code = report_data_get()
@@ -275,9 +277,8 @@ class TestReportDataGetHandler:
             assert isinstance(response, dict)
             assert response["item_count"] == 0
 
-    def test_report_data_get_with_selected_visualizations(
-        self, app: Flask, sample_grocery: None
-    ) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_report_data_get_with_selected_visualizations(self, app: Flask) -> None:
         """Test report_data_get with specific visualizations."""
         with app.test_request_context("/api/report/data?viz=stock_health&viz=department"):
             response, status_code = report_data_get()
@@ -288,9 +289,8 @@ class TestReportDataGetHandler:
             assert "stock_levels" in response
             assert "dept_counts" in response
 
-    def test_report_data_get_includes_all_defaults(
-        self, app: Flask, sample_grocery: None
-    ) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_report_data_get_includes_all_defaults(self, app: Flask) -> None:
         """Test that report_data_get includes all default keys."""
         with app.test_request_context("/api/report/data"):
             response, status_code = report_data_get()
@@ -306,9 +306,8 @@ class TestReportDataGetHandler:
             assert "top_items" in response
             assert "reorder_items" in response
 
-    def test_report_data_get_includes_summary_metrics(
-        self, app: Flask, sample_grocery: None
-    ) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_report_data_get_includes_summary_metrics(self, app: Flask) -> None:
         """Test that report_data_get includes summary metrics."""
         with app.test_request_context("/api/report/data"):
             response, status_code = report_data_get()
@@ -415,7 +414,8 @@ class TestReportDataBehavior:
 class TestIndexHandlerBehavior:
     """Behavioral tests for index page handlers."""
 
-    def test_search_workflow_preserves_user_context(self, app: Flask, sample_grocery: None) -> None:
+    @pytest.mark.usefixtures("sample_grocery")
+    def test_search_workflow_preserves_user_context(self, app: Flask) -> None:
         """BDD: As a user searching for items, the form should stay in search mode.
 
         Given: I am on the home page
@@ -423,9 +423,7 @@ class TestIndexHandlerBehavior:
         Then: The page stays in search mode with my results displayed
         """
         # When: Searching for an item
-        with app.test_request_context(
-            "/", method="POST", data={"send-search": "", "column": "id", "item": "1"}
-        ):
+        with app.test_request_context("/", method="POST", data={"send-search": "", "column": "id", "item": "1"}):
             result = index_post()
 
         # Then: Page remains in search mode
@@ -475,7 +473,10 @@ class TestIndexHandlerBehavior:
         When: I upload a CSV file
         Then: The page stays in CSV mode so I can upload more files
         """
-        csv_content = b"id,description,last_sold,shelf_life,department,price,unit,x_for,cost,quantity,reorder_point\n3002,CSV Item,2024-01-01,7d,Test,1.99,ea,1,0.99,10,5\n"
+        csv_content = (
+            b"id,description,last_sold,shelf_life,department,price,unit,x_for,cost,"
+            b"quantity,reorder_point\n3002,CSV Item,2024-01-01,7d,Test,1.99,ea,1,0.99,10,5\n"
+        )
 
         # When: Uploading a CSV
         with app.test_request_context(
