@@ -116,13 +116,15 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 # Tests - common ignores for all test files
-"tests/*" = ["S101", "D103", "ANN201", "ANN401", "PLR2004", "PT001", "ARG001"]
+"tests/*" = ["S101", "D103", "ANN201", "ANN401", "ANN001", "PLR2004", "PT001", "ARG001", "ARG002"]
 # Deployment tests need additional ignores for file operations and subprocess
 "tests/test_deployment.py" = ["PTH123", "S104", "S603", "S607"]
 # Demo files
 "demo/*" = ["T201", "S603", "S607", "PLR2004", "D103", "ANN401", "DTZ005", "FBT001", "FBT002", "TRY300", "BLE001"]
 # Scripts - utility scripts that need print, subprocess, etc.
 "scripts/*" = ["T201", "S603", "S606", "S607", "D", "ANN", "PTH123", "F841", "BLE001", "FURB105", "UP017", "INP001"]
+# Production simulation script
+"test_production_simulation.py" = ["T201", "EXE001", "BLE001", "PLR2004", "D", "ANN", "INP001"]
 # Migrations
 "migrations/*" = ["D", "ANN", "INP001"]
 # Source code

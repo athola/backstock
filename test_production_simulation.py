@@ -7,6 +7,7 @@ This script simulates exactly what happens in production when a user clicks
 
 import os
 import sys
+from pathlib import Path
 
 # Set production-like environment
 os.environ["APP_SETTINGS"] = "src.pybackstock.config.ProductionConfig"
@@ -108,9 +109,9 @@ try:
     print(f"   Content-Type: {response.headers.get('Content-Type')}")
 
     # Get response content
-    if hasattr(response, 'data'):
+    if hasattr(response, "data"):
         response_content = response.data
-    elif hasattr(response, 'get_data'):
+    elif hasattr(response, "get_data"):
         response_content = response.get_data()
     else:
         response_content = b""
@@ -120,19 +121,20 @@ try:
     if response.status_code == 200:
         print("   ✅ SUCCESS - Report generated without errors!")
         # Check for key content
-        html = response.text if hasattr(response, 'text') else response_content.decode('utf-8')
+        html = response.text if hasattr(response, "text") else response_content.decode("utf-8")
         if "Inventory Analytics Report" in html:
             print("   ✅ Report contains expected content")
         if "Fresh Apples" in html or "Organic Milk" in html:
             print("   ✅ Report displays inventory items")
     else:
         print(f"   ❌ FAILED - Got {response.status_code} status code")
-        response_text = response.text if hasattr(response, 'text') else response_content.decode('utf-8')
+        response_text = response.text if hasattr(response, "text") else response_content.decode("utf-8")
         print(f"   Response: {response_text[:500]}")
         sys.exit(1)
 except Exception as e:
     print(f"   ❌ FAILED - Exception: {e}")
     import traceback
+
     traceback.print_exc()
     sys.exit(1)
 
@@ -193,8 +195,8 @@ try:
     print(f"   Status Code: {response.status_code}")
 
     if response.status_code == 200:
-        response_content = response.get_data() if hasattr(response, 'get_data') else b""
-        html = response.text if hasattr(response, 'text') else response_content.decode('utf-8')
+        response_content = response.get_data() if hasattr(response, "get_data") else b""
+        html = response.text if hasattr(response, "text") else response_content.decode("utf-8")
         if "No Inventory Data Available" in html or "0" in html:
             print("   ✅ SUCCESS - Empty database handled gracefully!")
         else:
@@ -238,10 +240,10 @@ try:
         response = client.get("/report")
         if response.status_code != 200:
             failed_requests += 1
-            print(f"   ❌ Request {i+1} failed with status {response.status_code}")
+            print(f"   ❌ Request {i + 1} failed with status {response.status_code}")
 
     if failed_requests == 0:
-        print(f"   ✅ SUCCESS - All 10 concurrent requests succeeded!")
+        print("   ✅ SUCCESS - All 10 concurrent requests succeeded!")
     else:
         print(f"   ❌ FAILED - {failed_requests}/10 requests failed")
         sys.exit(1)
@@ -253,9 +255,9 @@ print()
 
 # Cleanup
 print("4. Cleanup...")
-import os as os_module
-if os_module.path.exists("test_production.db"):
-    os_module.remove("test_production.db")
+db_path = Path("test_production.db")
+if db_path.exists():
+    db_path.unlink()
 print("   ✓ Test database removed")
 print()
 
