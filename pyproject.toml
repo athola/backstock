@@ -115,20 +115,18 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# Tests - common ignores for all test files
-"tests/*" = ["S101", "D103", "ANN201", "ANN401", "PLR2004", "PT001", "ARG001"]
-# Deployment tests need additional ignores for file operations and subprocess
+# Tests - common ignores for test files (asserts, docstrings, magic values, etc.)
+"tests/*" = ["S101", "PLR2004", "D103", "ANN201", "ANN401", "ANN001", "PT001", "ARG001", "ARG002"]
+# Deployment tests - additional ignores for subprocess and file operations
 "tests/test_deployment.py" = ["PTH123", "S104", "S603", "S607"]
-# Demo files
-"demo/*" = ["T201", "S603", "S607", "PLR2004", "D103", "ANN401", "DTZ005", "FBT001", "FBT002", "TRY300", "BLE001"]
-# Scripts - utility scripts that need print, subprocess, etc.
+# Demo files - prints, subprocess calls, datetime, boolean args acceptable for demos
+"demo/*" = ["T201", "S603", "S607", "DTZ005", "FBT001", "FBT002", "TRY300", "BLE001", "PLR2004", "D103", "ANN401"]
+# Scripts - utility scripts with print, subprocess, etc.
 "scripts/*" = ["T201", "S603", "S606", "S607", "D", "ANN", "PTH123", "F841", "BLE001", "FURB105", "UP017", "INP001"]
-# Migrations
-"migrations/*" = ["D", "ANN", "INP001"]
+# Production simulation test script
+"test_production_simulation.py" = ["T201", "EXE001", "BLE001", "PLR2004", "D", "ANN", "INP001"]
 # Source code
-"src/pybackstock/app.py" = ["FBT001", "ANN401"]
 "src/pybackstock/models.py" = ["DTZ007"]
-"src/pybackstock/connexion_app.py" = ["PGH003"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
