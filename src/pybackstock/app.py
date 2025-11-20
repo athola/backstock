@@ -12,6 +12,9 @@ from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
 from flask import Flask, render_template, request
 from flask_talisman import Talisman
 from flask_wtf.csrf import CSRFProtect
@@ -108,6 +111,7 @@ def render_index_template(
     errors: list[str],
     items: list[Any],
     col: str,
+    *,
     load_search: bool,
     load_add_item: bool,
     load_add_csv: bool,
@@ -261,7 +265,14 @@ def index() -> str:
             errors, items = handle_csv_action()
 
     return render_index_template(
-        errors, items, col, load_search, load_add_item, load_add_csv, item_searched, item_added
+        errors,
+        items,
+        col,
+        load_search=load_search,
+        load_add_item=load_add_item,
+        load_add_csv=load_add_csv,
+        item_searched=item_searched,
+        item_added=item_added,
     )
 
 
@@ -634,7 +645,7 @@ def add_item(item: Grocery, errors: list[str], items: list[Any]) -> tuple[list[s
     return errors, items
 
 
-def iterate_through_csv(csv_input: Any, errors: list[str], items: list[Any]) -> None:
+def iterate_through_csv(csv_input: Iterator[list[str]], errors: list[str], items: list[Any]) -> None:
     """Process CSV input and add items to database.
 
     Args:

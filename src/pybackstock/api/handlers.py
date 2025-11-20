@@ -55,7 +55,14 @@ def index_get() -> str:
     item_added = False
 
     return render_index_template(
-        errors, items, col, load_search, load_add_item, load_add_csv, item_searched, item_added
+        errors,
+        items,
+        col,
+        load_search=load_search,
+        load_add_item=load_add_item,
+        load_add_csv=load_add_csv,
+        item_searched=item_searched,
+        item_added=item_added,
     )
 
 
@@ -93,7 +100,14 @@ def index_post() -> str:
         errors, items = handle_csv_action()
 
     return render_index_template(
-        errors, items, col, load_search, load_add_item, load_add_csv, item_searched, item_added
+        errors,
+        items,
+        col,
+        load_search=load_search,
+        load_add_item=load_add_item,
+        load_add_csv=load_add_csv,
+        item_searched=item_searched,
+        item_added=item_added,
     )
 
 
