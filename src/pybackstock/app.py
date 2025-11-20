@@ -107,45 +107,6 @@ class FormAction:
     CSV_SUBMIT = "csv-submit"
 
 
-def render_index_template(
-    errors: list[str],
-    items: list[Any],
-    col: str,
-    *,
-    load_search: bool,
-    load_add_item: bool,
-    load_add_csv: bool,
-    item_searched: bool,
-    item_added: bool,
-) -> str:
-    """Render the index template with given parameters.
-
-    Args:
-        errors: List of error messages.
-        items: List of items to display.
-        col: Column name for search.
-        load_search: Whether to load the search form.
-        load_add_item: Whether to load the add item form.
-        load_add_csv: Whether to load the CSV upload form.
-        item_searched: Whether a search was performed.
-        item_added: Whether an item was added.
-
-    Returns:
-        Rendered HTML template.
-    """
-    return render_template(
-        "index.html",
-        errors=errors,
-        items=items,
-        column=col,
-        loading_search=load_search,
-        loading_add_item=load_add_item,
-        loading_add_csv=load_add_csv,
-        item_searched=item_searched,
-        item_added=item_added,
-    )
-
-
 def handle_search_action() -> tuple[list[str], list[Any], bool, bool]:
     """Handle search form submission.
 
@@ -264,13 +225,14 @@ def index() -> str:
             load_search, load_add_item, load_add_csv = False, False, True
             errors, items = handle_csv_action()
 
-    return render_index_template(
-        errors,
-        items,
-        col,
-        load_search=load_search,
-        load_add_item=load_add_item,
-        load_add_csv=load_add_csv,
+    return render_template(
+        "index.html",
+        errors=errors,
+        items=items,
+        column=col,
+        loading_search=load_search,
+        loading_add_item=load_add_item,
+        loading_add_csv=load_add_csv,
         item_searched=item_searched,
         item_added=item_added,
     )
