@@ -287,9 +287,12 @@ def calculate_summary_metrics(items: list[Grocery]) -> dict[str, Any]:
 
     # Recent activity - items sold in last 30 days
     recent_threshold = datetime.now(UTC).date() - timedelta(days=30)
-    recent_sales = sum(
-        1 for item in items if item.last_sold and _normalize_to_date(item.last_sold) >= recent_threshold
-    )
+    recent_sales = 0
+    for item in items:
+        if item.last_sold:
+            last_sold_date = _normalize_to_date(item.last_sold)
+            if last_sold_date is not None and last_sold_date >= recent_threshold:
+                recent_sales += 1
 
     # Stock level counts
     low_stock_items = [item for item in items if item.quantity <= item.reorder_point]
@@ -361,6 +364,8 @@ def calculate_age_data(items: list[Grocery]) -> dict[str, Any]:
     for item in items:
         if item.date_added:
             item_date = _normalize_to_date(item.date_added)
+            if item_date is None:
+                continue
             age_days = (today - item_date).days
             if age_days <= AGE_RANGE_BOUNDARIES[0]:
                 age_distribution["0-30 days"] += 1
