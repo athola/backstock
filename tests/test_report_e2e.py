@@ -169,7 +169,7 @@ class TestReportGenerationE2E:
 
         def make_request() -> int:
             response = e2e_client.get("/report")
-            return response.status_code
+            return int(response.status_code)
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             futures = [executor.submit(make_request) for _ in range(5)]
