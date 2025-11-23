@@ -446,13 +446,7 @@ PHARMACY_ITEMS = [
 # COMPLETE CORPUS
 # =============================================================================
 GROCERY_CORPUS: list[GroceryItemTemplate] = (
-    PRODUCE_ITEMS
-    + DAIRY_ITEMS
-    + MEAT_ITEMS
-    + BAKERY_ITEMS
-    + GROCERY_ITEMS
-    + FROZEN_ITEMS
-    + PHARMACY_ITEMS
+    PRODUCE_ITEMS + DAIRY_ITEMS + MEAT_ITEMS + BAKERY_ITEMS + GROCERY_ITEMS + FROZEN_ITEMS + PHARMACY_ITEMS
 )
 
 # Total item count for reference

@@ -201,7 +201,7 @@ def handle_random_action() -> tuple[list[str], list[Any], int]:
     Returns:
         Tuple of (errors, items, count_added).
     """
-    from src.pybackstock.random_items import generate_random_item
+    from src.pybackstock.random_items import generate_random_item  # noqa: PLC0415
 
     errors: list[str] = []
     items: list[Any] = []

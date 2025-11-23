@@ -2,6 +2,9 @@
 
 This module provides functionality to generate randomized grocery items
 from a curated corpus of common grocery items with realistic pricing.
+
+Note: This module uses the standard random module for test data generation.
+The S311 warnings are suppressed as cryptographic randomness is not required.
 """
 
 from __future__ import annotations
@@ -9,7 +12,7 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from src.pybackstock.grocery_corpus import GROCERY_CORPUS, GroceryItemTemplate
 
@@ -55,7 +58,7 @@ def generate_random_price(template: GroceryItemTemplate) -> str:
     Returns:
         Formatted price string (e.g., "3.49").
     """
-    price = random.uniform(template.price_min, template.price_max)
+    price = random.uniform(template.price_min, template.price_max)  # noqa: S311
     return f"{price:.2f}"
 
 
@@ -70,7 +73,7 @@ def generate_random_cost(price_str: str, template: GroceryItemTemplate) -> str:
         Formatted cost string (e.g., "1.99").
     """
     price = float(price_str)
-    cost_ratio = random.uniform(template.cost_ratio_min, template.cost_ratio_max)
+    cost_ratio = random.uniform(template.cost_ratio_min, template.cost_ratio_max)  # noqa: S311
     cost = price * cost_ratio
     return f"{cost:.2f}"
 
@@ -84,10 +87,10 @@ def generate_random_last_sold(config: RandomItemConfig = DEFAULT_CONFIG) -> date
     Returns:
         A date within the configured range, or None.
     """
-    if random.random() < config.last_sold_null_probability:
+    if random.random() < config.last_sold_null_probability:  # noqa: S311
         return None
 
-    days_back = random.randint(0, config.last_sold_days_back)
+    days_back = random.randint(0, config.last_sold_days_back)  # noqa: S311
     return datetime.now(UTC).date() - timedelta(days=days_back)
 
 
@@ -100,7 +103,7 @@ def generate_random_quantity(config: RandomItemConfig = DEFAULT_CONFIG) -> int:
     Returns:
         Random quantity between configured bounds.
     """
-    return random.randint(config.quantity_min, config.quantity_max)
+    return random.randint(config.quantity_min, config.quantity_max)  # noqa: S311
 
 
 def generate_random_reorder_point(config: RandomItemConfig = DEFAULT_CONFIG) -> int:
@@ -112,7 +115,7 @@ def generate_random_reorder_point(config: RandomItemConfig = DEFAULT_CONFIG) -> 
     Returns:
         Random reorder point between configured bounds.
     """
-    return random.randint(config.reorder_point_min, config.reorder_point_max)
+    return random.randint(config.reorder_point_min, config.reorder_point_max)  # noqa: S311
 
 
 def generate_random_x_for(config: RandomItemConfig = DEFAULT_CONFIG) -> int:
@@ -124,7 +127,7 @@ def generate_random_x_for(config: RandomItemConfig = DEFAULT_CONFIG) -> int:
     Returns:
         Random x_for value (1, 2, 3, or 4) based on configured weights.
     """
-    return random.choices([1, 2, 3, 4], weights=config.x_for_weights, k=1)[0]
+    return random.choices([1, 2, 3, 4], weights=config.x_for_weights, k=1)[0]  # noqa: S311
 
 
 def generate_random_date_added(config: RandomItemConfig = DEFAULT_CONFIG) -> date:
@@ -136,7 +139,7 @@ def generate_random_date_added(config: RandomItemConfig = DEFAULT_CONFIG) -> dat
     Returns:
         A date within the configured range.
     """
-    days_back = random.randint(0, config.date_added_days_back)
+    days_back = random.randint(0, config.date_added_days_back)  # noqa: S311
     return datetime.now(UTC).date() - timedelta(days=days_back)
 
 
@@ -144,7 +147,7 @@ def generate_random_item_data(
     item_id: int,
     config: RandomItemConfig = DEFAULT_CONFIG,
     template: GroceryItemTemplate | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Generate random item data from a corpus template.
 
     Args:
@@ -156,7 +159,7 @@ def generate_random_item_data(
         Dictionary with all fields needed to create a Grocery item.
     """
     if template is None:
-        template = random.choice(GROCERY_CORPUS)
+        template = random.choice(GROCERY_CORPUS)  # noqa: S311
 
     price = generate_random_price(template)
     cost = generate_random_cost(price, template)
@@ -182,7 +185,7 @@ def generate_random_item(
     item_id: int,
     config: RandomItemConfig = DEFAULT_CONFIG,
     template: GroceryItemTemplate | None = None,
-) -> "Grocery":
+) -> Grocery:
     """Generate a random Grocery item from the corpus.
 
     Args:
@@ -193,7 +196,7 @@ def generate_random_item(
     Returns:
         A new Grocery instance with randomized data.
     """
-    from src.pybackstock.models import Grocery
+    from src.pybackstock.models import Grocery  # noqa: PLC0415
 
     data = generate_random_item_data(item_id, config, template)
     return Grocery(**data)
@@ -203,8 +206,9 @@ def generate_multiple_random_items(
     starting_id: int,
     count: int,
     config: RandomItemConfig = DEFAULT_CONFIG,
+    *,
     allow_duplicates: bool = False,
-) -> list["Grocery"]:
+) -> list[Grocery]:
     """Generate multiple random Grocery items.
 
     Args:
@@ -224,22 +228,20 @@ def generate_multiple_random_items(
         raise ValueError(msg)
 
     if allow_duplicates:
-        templates = [random.choice(GROCERY_CORPUS) for _ in range(count)]
+        templates = [random.choice(GROCERY_CORPUS) for _ in range(count)]  # noqa: S311
     else:
         templates = random.sample(GROCERY_CORPUS, count)
 
-    return [
-        generate_random_item(starting_id + i, config, template)
-        for i, template in enumerate(templates)
-    ]
+    return [generate_random_item(starting_id + i, config, template) for i, template in enumerate(templates)]
 
 
 def generate_multiple_random_item_data(
     starting_id: int,
     count: int,
     config: RandomItemConfig = DEFAULT_CONFIG,
+    *,
     allow_duplicates: bool = False,
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """Generate multiple random item data dictionaries.
 
     This is useful when you need the data without creating Grocery instances.
@@ -261,14 +263,11 @@ def generate_multiple_random_item_data(
         raise ValueError(msg)
 
     if allow_duplicates:
-        templates = [random.choice(GROCERY_CORPUS) for _ in range(count)]
+        templates = [random.choice(GROCERY_CORPUS) for _ in range(count)]  # noqa: S311
     else:
         templates = random.sample(GROCERY_CORPUS, count)
 
-    return [
-        generate_random_item_data(starting_id + i, config, template)
-        for i, template in enumerate(templates)
-    ]
+    return [generate_random_item_data(starting_id + i, config, template) for i, template in enumerate(templates)]
 
 
 def get_corpus_by_department(department: str) -> list[GroceryItemTemplate]:
@@ -296,7 +295,7 @@ def generate_random_item_from_department(
     item_id: int,
     department: str,
     config: RandomItemConfig = DEFAULT_CONFIG,
-) -> "Grocery":
+) -> Grocery:
     """Generate a random item from a specific department.
 
     Args:
@@ -316,5 +315,5 @@ def generate_random_item_from_department(
         msg = f"Department '{department}' not found. Available: {available}"
         raise ValueError(msg)
 
-    template = random.choice(dept_items)
+    template = random.choice(dept_items)  # noqa: S311
     return generate_random_item(item_id, config, template)
