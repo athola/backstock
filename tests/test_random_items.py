@@ -25,12 +25,10 @@ from src.pybackstock.random_items import (
     DEFAULT_CONFIG,
     RandomItemConfig,
     generate_multiple_random_item_data,
-    generate_multiple_random_items,
     generate_random_cost,
     generate_random_date_added,
-    generate_random_item,
     generate_random_item_data,
-    generate_random_item_from_department,
+    generate_random_item_data_from_department,
     generate_random_last_sold,
     generate_random_price,
     generate_random_quantity,
@@ -226,10 +224,13 @@ class TestRandomItemGeneration:
         assert data["shelf_life"] == "99d"
         assert float(data["price"]) == 5.00
 
-    def test_generate_random_item_creates_grocery_model(self, app) -> None:
-        """Verify generate_random_item creates a valid Grocery instance."""
+    def test_generate_random_item_data_creates_valid_grocery_data(self, app) -> None:
+        """Verify generated data can create a valid Grocery instance."""
+        from src.pybackstock.models import Grocery
+
         with app.app_context():
-            item = generate_random_item(item_id=100)
+            data = generate_random_item_data(item_id=100)
+            item = Grocery(**data)
             assert item.id == 100
             assert item.description
             assert item.department
@@ -238,46 +239,46 @@ class TestRandomItemGeneration:
             assert item.unit
             assert item.shelf_life
 
-    def test_generate_multiple_random_items(self, app) -> None:
-        """Verify multiple items can be generated."""
-        with app.app_context():
-            items = generate_multiple_random_items(starting_id=1, count=10)
-            assert len(items) == 10
-            ids = [item.id for item in items]
-            assert ids == list(range(1, 11))
-
-    def test_generate_multiple_random_items_unique(self, app) -> None:
-        """Verify items are unique when allow_duplicates=False."""
-        with app.app_context():
-            items = generate_multiple_random_items(
-                starting_id=1, count=50, allow_duplicates=False
-            )
-            descriptions = [item.description for item in items]
-            assert len(descriptions) == len(set(descriptions))
-
-    def test_generate_multiple_random_items_allows_duplicates(self, app) -> None:
-        """Verify duplicates are allowed when configured."""
-        with app.app_context():
-            # Generate more items than in corpus to ensure duplicates
-            items = generate_multiple_random_items(
-                starting_id=1, count=300, allow_duplicates=True
-            )
-            assert len(items) == 300
-
-    def test_generate_multiple_raises_for_too_many_unique(self, app) -> None:
-        """Verify error when requesting too many unique items."""
-        with app.app_context():
-            with pytest.raises(ValueError, match="Cannot generate"):
-                generate_multiple_random_items(
-                    starting_id=1, count=1000, allow_duplicates=False
-                )
-
     def test_generate_multiple_random_item_data(self) -> None:
         """Verify multiple item data dicts can be generated."""
-        data_list = generate_multiple_random_item_data(starting_id=1, count=5)
-        assert len(data_list) == 5
-        for i, data in enumerate(data_list):
-            assert data["item_id"] == i + 1
+        data_list = generate_multiple_random_item_data(starting_id=1, count=10)
+        assert len(data_list) == 10
+        ids = [data["item_id"] for data in data_list]
+        assert ids == list(range(1, 11))
+
+    def test_generate_multiple_random_item_data_unique(self) -> None:
+        """Verify items are unique when allow_duplicates=False."""
+        data_list = generate_multiple_random_item_data(
+            starting_id=1, count=50, allow_duplicates=False
+        )
+        descriptions = [data["description"] for data in data_list]
+        assert len(descriptions) == len(set(descriptions))
+
+    def test_generate_multiple_random_item_data_allows_duplicates(self) -> None:
+        """Verify duplicates are allowed when configured."""
+        # Generate more items than in corpus to ensure duplicates
+        data_list = generate_multiple_random_item_data(
+            starting_id=1, count=300, allow_duplicates=True
+        )
+        assert len(data_list) == 300
+
+    def test_generate_multiple_raises_for_too_many_unique(self) -> None:
+        """Verify error when requesting too many unique items."""
+        with pytest.raises(ValueError, match="Cannot generate"):
+            generate_multiple_random_item_data(
+                starting_id=1, count=1000, allow_duplicates=False
+            )
+
+    def test_generate_multiple_creates_valid_groceries(self, app) -> None:
+        """Verify multiple generated data can create valid Grocery instances."""
+        from src.pybackstock.models import Grocery
+
+        with app.app_context():
+            data_list = generate_multiple_random_item_data(starting_id=1, count=10)
+            items = [Grocery(**data) for data in data_list]
+            assert len(items) == 10
+            for i, item in enumerate(items):
+                assert item.id == i + 1
 
 
 class TestDepartmentFiltering:
@@ -306,17 +307,24 @@ class TestDepartmentFiltering:
         items = get_corpus_by_department("NonexistentDept")
         assert items == []
 
-    def test_generate_random_item_from_department(self, app) -> None:
-        """Verify items can be generated from specific department."""
+    def test_generate_random_item_data_from_department(self) -> None:
+        """Verify item data can be generated from specific department."""
+        data = generate_random_item_data_from_department(item_id=1, department="Dairy")
+        assert data["department"] == "Dairy"
+
+    def test_generate_random_item_data_from_department_creates_grocery(self, app) -> None:
+        """Verify department-specific data creates valid Grocery instance."""
+        from src.pybackstock.models import Grocery
+
         with app.app_context():
-            item = generate_random_item_from_department(item_id=1, department="Dairy")
+            data = generate_random_item_data_from_department(item_id=1, department="Dairy")
+            item = Grocery(**data)
             assert item.department == "Dairy"
 
-    def test_generate_random_item_from_invalid_department(self, app) -> None:
+    def test_generate_random_item_data_from_invalid_department(self) -> None:
         """Verify error for invalid department."""
-        with app.app_context():
-            with pytest.raises(ValueError, match="not found"):
-                generate_random_item_from_department(item_id=1, department="FakeDept")
+        with pytest.raises(ValueError, match="not found"):
+            generate_random_item_data_from_department(item_id=1, department="FakeDept")
 
 
 class TestRandomItemConfig:

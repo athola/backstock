@@ -23,6 +23,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Import shared database instance
 from src.pybackstock.database import db
+from src.pybackstock.random_items import generate_random_item_data
 
 # Constants for analytics calculations
 PRICE_RANGE_BOUNDARIES = (5, 10, 20, 50)
@@ -201,8 +202,6 @@ def handle_random_action() -> tuple[list[str], list[Any], int]:
     Returns:
         Tuple of (errors, items, count_added).
     """
-    from src.pybackstock.random_items import generate_random_item  # noqa: PLC0415
-
     errors: list[str] = []
     items: list[Any] = []
     count_added = 0
@@ -217,7 +216,8 @@ def handle_random_action() -> tuple[list[str], list[Any], int]:
         next_id = (max_id_result or 0) + 1
 
         for i in range(count):
-            item = generate_random_item(next_id + i)
+            item_data = generate_random_item_data(next_id + i)
+            item = Grocery(**item_data)
             # Check if ID already exists (shouldn't happen but be safe)
             item_exists = db.session.query(Grocery).filter(Grocery.id == item.id).first() is not None
             if not item_exists:

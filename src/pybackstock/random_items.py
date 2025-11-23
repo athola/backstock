@@ -1,10 +1,14 @@
 """Random grocery item generator using the grocery corpus.
 
-This module provides functionality to generate randomized grocery items
+This module provides functionality to generate randomized grocery item data
 from a curated corpus of common grocery items with realistic pricing.
 
 Note: This module uses the standard random module for test data generation.
 The S311 warnings are suppressed as cryptographic randomness is not required.
+
+This module returns dictionaries of item data rather than Grocery model instances
+to avoid circular import issues. Callers should create Grocery instances from
+the returned data as needed.
 """
 
 from __future__ import annotations
@@ -12,12 +16,9 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from src.pybackstock.grocery_corpus import GROCERY_CORPUS, GroceryItemTemplate
-
-if TYPE_CHECKING:
-    from src.pybackstock.models import Grocery
 
 
 @dataclass
@@ -181,60 +182,6 @@ def generate_random_item_data(
     }
 
 
-def generate_random_item(
-    item_id: int,
-    config: RandomItemConfig = DEFAULT_CONFIG,
-    template: GroceryItemTemplate | None = None,
-) -> Grocery:
-    """Generate a random Grocery item from the corpus.
-
-    Args:
-        item_id: The unique ID for the generated item.
-        config: Configuration for random generation.
-        template: Optional specific template to use. If None, randomly selected.
-
-    Returns:
-        A new Grocery instance with randomized data.
-    """
-    from src.pybackstock.models import Grocery  # noqa: PLC0415
-
-    data = generate_random_item_data(item_id, config, template)
-    return Grocery(**data)
-
-
-def generate_multiple_random_items(
-    starting_id: int,
-    count: int,
-    config: RandomItemConfig = DEFAULT_CONFIG,
-    *,
-    allow_duplicates: bool = False,
-) -> list[Grocery]:
-    """Generate multiple random Grocery items.
-
-    Args:
-        starting_id: The ID for the first item.
-        count: Number of items to generate.
-        config: Configuration for random generation.
-        allow_duplicates: If False, each item will be unique from the corpus.
-
-    Returns:
-        List of Grocery instances.
-
-    Raises:
-        ValueError: If count > corpus size and allow_duplicates is False.
-    """
-    if not allow_duplicates and count > len(GROCERY_CORPUS):
-        msg = f"Cannot generate {count} unique items from corpus of {len(GROCERY_CORPUS)} items"
-        raise ValueError(msg)
-
-    if allow_duplicates:
-        templates = [random.choice(GROCERY_CORPUS) for _ in range(count)]  # noqa: S311
-    else:
-        templates = random.sample(GROCERY_CORPUS, count)
-
-    return [generate_random_item(starting_id + i, config, template) for i, template in enumerate(templates)]
-
-
 def generate_multiple_random_item_data(
     starting_id: int,
     count: int,
@@ -243,8 +190,6 @@ def generate_multiple_random_item_data(
     allow_duplicates: bool = False,
 ) -> list[dict[str, Any]]:
     """Generate multiple random item data dictionaries.
-
-    This is useful when you need the data without creating Grocery instances.
 
     Args:
         starting_id: The ID for the first item.
@@ -291,12 +236,12 @@ def get_available_departments() -> list[str]:
     return sorted({item.department for item in GROCERY_CORPUS})
 
 
-def generate_random_item_from_department(
+def generate_random_item_data_from_department(
     item_id: int,
     department: str,
     config: RandomItemConfig = DEFAULT_CONFIG,
-) -> Grocery:
-    """Generate a random item from a specific department.
+) -> dict[str, Any]:
+    """Generate random item data from a specific department.
 
     Args:
         item_id: The unique ID for the generated item.
@@ -304,7 +249,7 @@ def generate_random_item_from_department(
         config: Configuration for random generation.
 
     Returns:
-        A new Grocery instance from the specified department.
+        Dictionary with all fields needed to create a Grocery item.
 
     Raises:
         ValueError: If the department doesn't exist in the corpus.
@@ -316,4 +261,4 @@ def generate_random_item_from_department(
         raise ValueError(msg)
 
     template = random.choice(dept_items)  # noqa: S311
-    return generate_random_item(item_id, config, template)
+    return generate_random_item_data(item_id, config, template)
