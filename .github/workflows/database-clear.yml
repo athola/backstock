@@ -80,7 +80,7 @@ jobs:
         with:
           name: pre-clear-backup-${{ github.run_number }}
           path: backups/*.sql.gz
-          retention-days: 30
+          retention-days: 7
 
   clear:
     name: Clear Inventory Data
@@ -147,7 +147,7 @@ jobs:
           echo "The database has been cleared."
           echo ""
           echo "To restore from backup:"
-          echo "  1. Download the pre-clear backup artifact from this workflow run"
+          echo "  1. Download the pre-clear backup artifact (available for 7 days)"
           echo "  2. Run: gunzip -c <backup_file> | psql \$DATABASE_URL"
           echo ""
           echo "To add test data:"
