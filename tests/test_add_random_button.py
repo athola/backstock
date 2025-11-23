@@ -7,12 +7,14 @@ TDD/BDD tests for ensuring the Add Random Items button:
 """
 
 import os
+from pathlib import Path
 
 # Set test environment BEFORE importing app modules
 os.environ["APP_SETTINGS"] = "src.pybackstock.config.TestingConfig"
 os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 import pytest
+import yaml
 from flask.testing import FlaskClient
 
 
@@ -620,9 +622,7 @@ class TestOpenAPISpecRandomItems:
         When I check the POST / endpoint schema
         Then it should include add-random property
         """
-        import yaml
-
-        with open("openapi.yaml") as f:
+        with Path("openapi.yaml").open() as f:
             spec = yaml.safe_load(f)
 
         post_spec = spec["paths"]["/"]["post"]
@@ -639,9 +639,7 @@ class TestOpenAPISpecRandomItems:
         When I check the POST / endpoint schema
         Then it should include random-item-count property with constraints
         """
-        import yaml
-
-        with open("openapi.yaml") as f:
+        with Path("openapi.yaml").open() as f:
             spec = yaml.safe_load(f)
 
         post_spec = spec["paths"]["/"]["post"]
@@ -662,9 +660,7 @@ class TestOpenAPISpecRandomItems:
         When I check the POST / endpoint schema
         Then it should include send-random property for form submission
         """
-        import yaml
-
-        with open("openapi.yaml") as f:
+        with Path("openapi.yaml").open() as f:
             spec = yaml.safe_load(f)
 
         post_spec = spec["paths"]["/"]["post"]
