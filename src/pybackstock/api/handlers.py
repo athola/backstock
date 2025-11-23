@@ -8,7 +8,7 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 from flask import Response, current_app, make_response, render_template, request
 
@@ -132,19 +132,16 @@ def index_get() -> str:
     """
     errors: list[str] = []
     items: list[Any] = []
-    return cast(
-        "str",
-        render_template(
-            "index.html",
-            errors=errors,
-            items=items,
-            column="ID",
-            loading_search=False,
-            loading_add_item=True,
-            loading_add_csv=False,
-            item_searched=False,
-            item_added=False,
-        ),
+    return render_template(
+        "index.html",
+        errors=errors,
+        items=items,
+        column="ID",
+        loading_search=False,
+        loading_add_item=True,
+        loading_add_csv=False,
+        item_searched=False,
+        item_added=False,
     )
 
 
@@ -181,19 +178,16 @@ def index_post() -> str:
         load_search, load_add_item, load_add_csv = False, False, True
         errors, items = handle_csv_action()
 
-    return cast(
-        "str",
-        render_template(
-            "index.html",
-            errors=errors,
-            items=items,
-            column=col,
-            loading_search=load_search,
-            loading_add_item=load_add_item,
-            loading_add_csv=load_add_csv,
-            item_searched=item_searched,
-            item_added=item_added,
-        ),
+    return render_template(
+        "index.html",
+        errors=errors,
+        items=items,
+        column=col,
+        loading_search=load_search,
+        loading_add_item=load_add_item,
+        loading_add_csv=load_add_csv,
+        item_searched=item_searched,
+        item_added=item_added,
     )
 
 

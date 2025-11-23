@@ -7,7 +7,7 @@ from typing import Any
 from src.pybackstock.database import db
 
 
-class Grocery(db.Model):
+class Grocery(db.Model):  # type: ignore[name-defined]
     """Grocery item model representing items in the inventory."""
 
     __tablename__ = "grocery_items"
